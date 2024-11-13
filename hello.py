@@ -81,7 +81,7 @@ levels = {
             0.2,
             "up",
             0.01,
-            ("keyup", "left"),
+            ("keyUp", "left"),
             ("keyDown", "right"),
             0.1,
             ("keyUp", "right"),
@@ -92,7 +92,7 @@ levels = {
         "5": [
             ("keyDown", "left"),
             1.5,
-            ("KeyUp", "left"),
+            ("keyUp", "left"),
             ("keyDown", "right"),
             1.8,
             ("keyUp", "right"),
@@ -101,7 +101,7 @@ levels = {
             "up",
         ],
     },
-}
+},
 
 # Manually select a level to use
 selected_door = input("Which door are you playing? (default: pits)") or "pits"
@@ -153,5 +153,3 @@ for door in list(levels)[selected_door_index:]:
                     pyautogui.keyDown(step[1])
                 elif step[0] == "keyUp":
                     pyautogui.keyUp(step[1])
-                else:
-                    pyautogui.press(step[1])
