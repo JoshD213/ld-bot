@@ -1,5 +1,6 @@
 import pyautogui
 import time
+import os
 
 levels = {
     "pits": {
@@ -14,10 +15,9 @@ levels = {
     },
     "spikes": {
         "1": [
-            1,
             ("keyDown", "right"),
             0.45,
-            ("keyup", "right"),
+            ("keyUp", "right"),
             0.01,
             ("keyDown", "left"),
             "up",
@@ -49,13 +49,14 @@ levels = {
         "5": [
             ("keyDown", "left"),
             1.5,
-            ("KeyUp", "left"),
+            ("keyUp", "left"),
             ("keyDown", "right"),
             1.8,
             ("keyUp", "right"),
             0.6,
             ("keyDown", "left"),
             "up",
+            3,
         ],
     },
     "push": {
@@ -90,6 +91,8 @@ levels = {
             ("keyUp", "right"),
             2.7,
             ("keyDown", "right"),
+            0.5,
+            "up",
         ],
         "5": [
             ("keyDown", "left"),
@@ -142,7 +145,7 @@ levels = {
             "up",
             0.1,
             "up",
-            0.5,
+            0.4,
             "up",
             0.2,
             "up",
@@ -168,6 +171,12 @@ levels = {
             "up",
             0.2,
             "up",
+            0.2,
+            "up",
+            0.2,
+            "up",
+            0.2,
+            "up",
             0.08,
             "up",
             0.08,
@@ -186,22 +195,37 @@ levels = {
             "up",
             0.1,
             "up",
-            0.08,
-            "up",
-            0.08,
-            "up",
-             0.08,
-            "up",
             0.3,
             ("keyUp", "right"),
         ],
     },
+    "controls": {
+        "1": [
+            ("keyDown", "left"),
+        ],
+        "2": [
+            ("keyUp", "right"),
+            0.5,
+            "up",
+        ],
+    },
 }
 
-# Manually select a level to use
-selected_door = input("Which door are you playing? (default: pits)") or "pits"
-selected_level = input("Which level are you playing? (default: 1)") or "1"
-# timings = levels[door][level]
+
+def finder(folder, grayscale):
+    level_screenshots = [folder+file for file in os.listdir(folder)]
+    for screenshot in level_screenshots:
+        try:
+            location = pyautogui.locateOnScreen(
+                screenshot, confidence=0.6, minSearchTime=3, grayscale=grayscale
+            )
+        except pyautogui.ImageNotFoundException:
+            continue
+        if location:
+            return screenshot.split("/")[-1].split(".")[0]
+    return None
+
+
 loading_delay = 5
 
 print(f"Move your focus to the window, you have {loading_delay} seconds!")
@@ -211,13 +235,27 @@ time.sleep(loading_delay)
 pyautogui.press("right")
 pyautogui.press("left")
 
+# Manually select a level to use
+# selected_door = input("Which door are you playing? (default: pits)") or "pits"
+selected_door = finder("./door_screenshots/", grayscale=False)
+
+if selected_door is None:
+    pyautogui.press("esc")
+    selected_door = finder("./door_screenshots/", grayscale=False)
+
+pyautogui.press("space")
+time.sleep(2)
+
+# selected_level = input("Which level are you playing? (default: 1)") or "1"
+selected_level = finder("./level_screenshots/", grayscale=True)
+selected_level = str(int(selected_level) - 1)
+
 selected_door_index = list(levels.keys()).index(selected_door)
 
 # loop over doors
 for door in list(levels)[selected_door_index:]:
     print("\n\ndoor", door)
     time.sleep(loading_delay)
-    pyautogui.press("space")
     selected_level_index = list(levels[door].keys()).index(selected_level)
 
     # loop over levels
@@ -248,3 +286,9 @@ for door in list(levels)[selected_door_index:]:
                     pyautogui.keyDown(step[1])
                 elif step[0] == "keyUp":
                     pyautogui.keyUp(step[1])
+
+        pyautogui.sleep(2)
+        current_level = finder("./level_screenshots/", grayscale=True)
+        if current_level == level:
+            print("you died 💀")
+            # make this retry the level
