@@ -213,18 +213,58 @@ levels = {
 
 
 def finder(folder, grayscale):
-    level_screenshots = [folder+file for file in os.listdir(folder)]
-    for screenshot in level_screenshots:
-        try:
-            location = pyautogui.locateOnScreen(
-                screenshot, confidence=0.6, minSearchTime=3, grayscale=grayscale
-            )
-        except pyautogui.ImageNotFoundException:
-            continue
-        if location:
-            return screenshot.split("/")[-1].split(".")[0]
-    return None
+    level_screenshots = [folder + file for file in os.listdir(folder)]
+    while True:
+        for screenshot in level_screenshots:
+            try:
+                location = pyautogui.locateOnScreen(
+                    screenshot, confidence=0.6, minSearchTime=3, grayscale=grayscale
+                )
+            except pyautogui.ImageNotFoundException:
+                continue
+            if location:
+                return screenshot.split("/")[-1].split(".")[0]
+        return None
 
+
+def play_level(steps):
+    # Loop over each item in this level
+    for step in steps:
+        print("step", step)
+
+        # If it's an integer or float, sleep that amount of time
+        if isinstance(step, int) or isinstance(step, float):
+            time.sleep(step)
+
+        # If it's a string, press that key
+        elif isinstance(step, str):
+            pyautogui.press(step)
+
+        # If it's a tuple (), then take the first value as the action (like keyDown)
+        # and the second value as the key
+        elif isinstance(step, tuple):
+            if step[0] == "keyDown":
+                pyautogui.keyDown(step[1])
+            elif step[0] == "keyUp":
+                pyautogui.keyUp(step[1])
+
+def door_selector():
+    # Manually select a level to use
+    selected_door = finder("./door_screenshots/", grayscale=False)
+
+    if selected_door is None:
+        pyautogui.press("esc")
+        selected_door = finder("./door_screenshots/", grayscale=False)
+
+    pyautogui.press("space")
+    time.sleep(2)
+    
+    selected_level = finder("./level_screenshots/", grayscale=True)
+    selected_level = str(int(selected_level) - 1)
+
+    selected_door_index = list(levels.keys()).index(selected_door)
+    
+    return selected_door, selected_level, selected_door_index
 
 loading_delay = 5
 
@@ -235,23 +275,13 @@ time.sleep(loading_delay)
 pyautogui.press("right")
 pyautogui.press("left")
 
-# Manually select a level to use
-# selected_door = input("Which door are you playing? (default: pits)") or "pits"
-selected_door = finder("./door_screenshots/", grayscale=False)
+selected_door, selected_level, selected_door_index = door_selector()
 
-if selected_door is None:
-    pyautogui.press("esc")
-    selected_door = finder("./door_screenshots/", grayscale=False)
+# TODO: Currently we check if dead too fast, and on pits door 4, we 
+# assume death even though success, and reset to 1 due to door selector.
 
-pyautogui.press("space")
-time.sleep(2)
-
-# selected_level = input("Which level are you playing? (default: 1)") or "1"
-selected_level = finder("./level_screenshots/", grayscale=True)
-selected_level = str(int(selected_level) - 1)
-
-selected_door_index = list(levels.keys()).index(selected_door)
-
+# TODO: These loops need to become WHILE loops, so we can dynamically
+# change levels if needed rather than always going in order.
 # loop over doors
 for door in list(levels)[selected_door_index:]:
     print("\n\ndoor", door)
@@ -267,28 +297,15 @@ for door in list(levels)[selected_door_index:]:
         print("\nlevel", level)
         steps = levels[door][level]
 
-        # Loop over each item in this level
-        for step in steps:
-            print("step", step)
+        while True:
+            play_level(steps)
 
-            # If it's an integer or float, sleep that amount of time
-            if isinstance(step, int) or isinstance(step, float):
-                time.sleep(step)
-
-            # If it's a string, press that key
-            elif isinstance(step, str):
-                pyautogui.press(step)
-
-            # If it's a tuple (), then take the first value as the action (like keyDown)
-            # and the second value as the key
-            elif isinstance(step, tuple):
-                if step[0] == "keyDown":
-                    pyautogui.keyDown(step[1])
-                elif step[0] == "keyUp":
-                    pyautogui.keyUp(step[1])
-
-        pyautogui.sleep(2)
-        current_level = finder("./level_screenshots/", grayscale=True)
-        if current_level == level:
-            print("you died 💀")
-            # make this retry the level
+            current_level = finder("./level_screenshots/", grayscale=True)
+            if current_level == level:
+                print("you died 💀")
+                # Reset the door and level since we may be stuck somewhere
+                door, level, _ = door_selector()
+                # Reset the steps to whatever level we are now on
+                steps = levels[door][level]
+            else:
+                break
