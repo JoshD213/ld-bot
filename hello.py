@@ -212,19 +212,22 @@ levels = {
 }
 
 
-def finder(folder, grayscale):
+def finder(folder, grayscale=False, min_search_time=3):
     level_screenshots = [folder + file for file in os.listdir(folder)]
-    while True:
-        for screenshot in level_screenshots:
-            try:
-                location = pyautogui.locateOnScreen(
-                    screenshot, confidence=0.6, minSearchTime=3, grayscale=grayscale
-                )
-            except pyautogui.ImageNotFoundException:
-                continue
-            if location:
-                return screenshot.split("/")[-1].split(".")[0]
-        return None
+    for screenshot in level_screenshots:
+        try:
+            location = pyautogui.locateOnScreen(
+                screenshot,
+                confidence=0.8,
+                minSearchTime=min_search_time,
+                grayscale=grayscale,
+            )
+        except pyautogui.ImageNotFoundException:
+            continue
+        if location:
+            print("screenshot found at location", location)
+            return screenshot.split("/")[-1].split(".")[0]
+    return None
 
 
 def play_level(steps):
@@ -248,23 +251,31 @@ def play_level(steps):
             elif step[0] == "keyUp":
                 pyautogui.keyUp(step[1])
 
-def door_selector():
+
+def detect_door_and_level():
     # Manually select a level to use
-    selected_door = finder("./door_screenshots/", grayscale=False)
+    selected_door = finder("./door_screenshots/")
+    print("Found door?", selected_door)
 
     if selected_door is None:
+        print("No doors found, going to map.")
         pyautogui.press("esc")
-        selected_door = finder("./door_screenshots/", grayscale=False)
+        selected_door = finder("./door_screenshots/")
+        print("Found door?", selected_door)
+
+    selected_door_index = list(levels.keys()).index(selected_door)
+    print("Selected door index", selected_door_index)
 
     pyautogui.press("space")
     time.sleep(2)
-    
+
     selected_level = finder("./level_screenshots/", grayscale=True)
     selected_level = str(int(selected_level) - 1)
+    print("Found level?", selected_level)
 
-    selected_door_index = list(levels.keys()).index(selected_door)
-    
+    print("Final answer:", selected_door, selected_door_index, selected_level)
     return selected_door, selected_level, selected_door_index
+
 
 loading_delay = 5
 
@@ -275,9 +286,9 @@ time.sleep(loading_delay)
 pyautogui.press("right")
 pyautogui.press("left")
 
-selected_door, selected_level, selected_door_index = door_selector()
+selected_door, selected_level, selected_door_index = detect_door_and_level()
 
-# TODO: Currently we check if dead too fast, and on pits door 4, we 
+# Currently we check if dead too fast, and on pits door 4, we
 # assume death even though success, and reset to 1 due to door selector.
 
 # TODO: These loops need to become WHILE loops, so we can dynamically
@@ -300,12 +311,34 @@ for door in list(levels)[selected_door_index:]:
         while True:
             play_level(steps)
 
-            current_level = finder("./level_screenshots/", grayscale=True)
-            if current_level == level:
+            # Check for chomps, use colored red screenshots of the chomp screen
+            # keep checking for chomps for like 10 seconds or something long
+            # Once chomp is detected, delay exactly 5s or so (for the level to load), then proceed
+
+            # use finder() on a folder with chomp screenshots in color
+            chomp = finder("./chomp/", min_search_time=10)
+
+            # if chomp is detected, run this:
+            if chomp:
+                time.sleep(loading_delay)
+            else:
                 print("you died 💀")
                 # Reset the door and level since we may be stuck somewhere
-                door, level, _ = door_selector()
+                door, level, _ = detect_door_and_level()
                 # Reset the steps to whatever level we are now on
                 steps = levels[door][level]
-            else:
-                break
+
+            # if chomp is not detected but we waited over the time limit (10s),
+            # then assume we died and retry
+
+            # current_level = finder("./level_screenshots/", grayscale=True)
+            # if current_level == level:
+            #     print("you died 💀")
+            #     # Reset the door and level since we may be stuck somewhere
+            #     door, level, _ = detect_door_and_level()
+            #     # Reset the steps to whatever level we are now on
+            #     steps = levels[door][level]
+            # else:
+            #     break
+
+            # curently we are detecting door pits when we are not on
