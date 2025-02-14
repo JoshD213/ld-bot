@@ -1,6 +1,11 @@
 import pyautogui
 import time
 import os
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 levels = {
     "pits": {
@@ -225,7 +230,21 @@ def finder(folder, grayscale=False, min_search_time=3):
         except pyautogui.ImageNotFoundException:
             continue
         if location:
-            print("screenshot found at location", location)
+            # Extract coordinates from location tuple
+            left, top, width, height = location
+            
+            # Take screenshot of the matched region
+            match_screenshot = pyautogui.screenshot(
+                region=(left, top, width, height)
+            )
+            
+            # Save the matched region screenshot
+            match_filename = f"debugging_screenshots/match_{screenshot.split('/')[-1]}"
+            match_screenshot.save(match_filename)
+            
+            print("Screenshot found at location", location)
+            print(f"Match screenshot saved as {match_filename}")
+            
             return screenshot.split("/")[-1].split(".")[0]
     return None
 
@@ -254,12 +273,14 @@ def play_level(steps):
 
 def detect_door_and_level():
     # Manually select a level to use
+    print("Looking for door...")
     selected_door = finder("./door_screenshots/")
     print("Found door?", selected_door)
 
     if selected_door is None:
         print("No doors found, going to map.")
         pyautogui.press("esc")
+        print("Looking for door again...")
         selected_door = finder("./door_screenshots/")
         print("Found door?", selected_door)
 
@@ -268,6 +289,7 @@ def detect_door_and_level():
 
     pyautogui.press("space")
     time.sleep(2)
+    print("Looking for level number...")
 
     selected_level = finder("./level_screenshots/", grayscale=True)
     selected_level = str(int(selected_level) - 1)
@@ -279,8 +301,33 @@ def detect_door_and_level():
 
 loading_delay = 5
 
-print(f"Move your focus to the window, you have {loading_delay} seconds!")
-time.sleep(loading_delay)
+
+
+# Configure Chrome options
+options = Options()
+# options.add_argument('--headless=new')
+
+# Initialize headless Chrome browser
+driver = webdriver.Chrome(options=options)
+
+# Navigate to a website
+driver.get('https://poki.com/en/g/level-devil')
+
+fs_button = WebDriverWait(driver, 10).until(
+    EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
+)
+fs_button.click()
+# print(f"Move your focus to the window, you have {loading_delay} seconds!")
+# time.sleep(loading_delay)
+
+# location = pyautogui.locateOnScreen(
+# "general_screenshots/1player.png", confidence=0.8, minSearchTime=10
+# )
+# center = pyautogui.center(location)
+pyautogui.moveTo(600, 670, duration=0.5)
+pyautogui.sleep(5)
+pyautogui.click()
+#TODO next escape is exiting full screen instead of going to map
 
 # reset the keyss incase one is sstill being pressed
 pyautogui.press("right")
@@ -316,7 +363,7 @@ for door in list(levels)[selected_door_index:]:
             # Once chomp is detected, delay exactly 5s or so (for the level to load), then proceed
 
             # use finder() on a folder with chomp screenshots in color
-            chomp = finder("./chomp/", min_search_time=10)
+            chomp = finder("./general_screenshots/", min_search_time=10)
 
             # if chomp is detected, run this:
             if chomp:
