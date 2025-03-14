@@ -41,7 +41,7 @@ fs_button.click()
 # )
 # center = pyautogui.center(location)
 pyautogui.moveTo(600, 670, duration=0.5)
-pyautogui.sleep(5)
+pyautogui.sleep(8)
 pyautogui.click()
 
 # reset the keyss incase one is sstill being pressed
@@ -73,8 +73,12 @@ for door in list(levels)[selected_door_index:]:
             # Run the steps
             play_level(steps)
             
+            # Sleep after finishing a level, to give it time to load the next one
+            # before we start scanning to see if we've gone to the next level.
+            pyautogui.sleep(3)
+            
             # TODO: Test both methods and pick one. Currently level scanner is getting incorrect
-            # scan results (though level 2 pits was level 1), and chomp scanner is not running in time
+            # scan results (thought level 2 pits was level 1), and chomp scanner is not running in time
             # (chomp is over before scanning starts)
             
             # CHOMP METHOD: LEVEL IS WON WHEN WE SEE CHOMPS -------------------
@@ -112,3 +116,6 @@ for door in list(levels)[selected_door_index:]:
             else:
                 break
             # END LEVEL SCAN METHOD -------------------------------------------
+
+            # fix transition between doors
+            # get this working before working on more advanced stuff
