@@ -92,6 +92,11 @@ def detect_door_and_level():
         selected_door = finder("./door_screenshots/", confidence=0.5)
         print("Found door?", selected_door)
 
+
+        # if door is still not found select default door   
+        if selected_door is None:
+            selected_door = "pits"
+
     selected_door_index = list(levels.keys()).index(selected_door)
     print("Selected door index", selected_door_index)
 

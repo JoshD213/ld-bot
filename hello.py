@@ -59,6 +59,7 @@ selected_door, selected_level, selected_door_index = detect_door_and_level()
 for door in list(levels)[selected_door_index:]:
     print("\n\ndoor", door)
     time.sleep(loading_delay)
+    pyautogui.press("space")
     selected_level_index = list(levels[door].keys()).index(selected_level)
 
     # loop over levels
