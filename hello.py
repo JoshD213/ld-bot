@@ -8,24 +8,72 @@ from selenium.webdriver.common.by import By
 import subprocess
 from level_timings import levels
 from utils import finder, play_level, detect_door_and_level, detect_level
+import os
+import json
+from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
+
+SESSION_FILE = "session.json"
+
+
+def save_session_info(driver):
+    session_info = {"url": driver.command_executor._url, "id": driver.session_id}
+    with open(SESSION_FILE, "w") as f:
+        json.dump(session_info, f)
+
+
+def load_session_info():
+    with open(SESSION_FILE, "r") as f:
+        return json.load(f)
+
+
+def attach_to_session(executor_url, session_id):
+    # Create a dummy driver just to hijack its session
+    driver = webdriver.Remote(command_executor=executor_url, desired_capabilities={})
+    driver.close()  # Close the new window
+    driver.session_id = session_id
+    return driver
+
+
+def set_up_driver():
+    driver = None
+    if os.path.exists(SESSION_FILE):
+        # Try to resume session
+        session = load_session_info()
+        try:
+            driver = attach_to_session(session["url"], session["id"])
+            # Test if session is still alive
+            driver.title  # Will raise if session is dead
+            print("Resumed existing session.")
+        except WebDriverException:
+            print("Session expired. Starting new browser.")
+            os.remove(SESSION_FILE)
+    if driver is None:
+        # Start new browser
+        # Configure Chrome options
+        options = Options()
+        # options.add_argument('--headless=new')
+        # options.add_argument("user-data-dir=path/to/your/custom/profile")
+        options.add_experimental_option("detach", True)
+        driver = webdriver.Chrome(options=options)
+        # RESUME HERE: AttributeError: 'ChromiumRemoteConnection' object has no attribute '_url'
+        save_session_info(driver)
+        print("Started new browser session.")
+    return driver
 
 
 # delete any debugging screenshots
-subprocess.Popen("rm ./debugging_screenshots/*", shell = True)
+subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 
-loading_delay = 5
-
-# Configure Chrome options
-options = Options()
-# options.add_argument('--headless=new')
+loading_delay = 4
 
 # Initialize headless Chrome browser
-driver = webdriver.Chrome(options=options)
+driver = set_up_driver()
 
 # Navigate to a website
-driver.get('https://poki.com/en/g/level-devil')
+driver.get("https://poki.com/en/g/level-devil")
 
-# If you want to debug issues or take screenshots, uncomment this line to 
+# If you want to debug issues or take screenshots, uncomment this line to
 # keep the testing browser open
 # time.sleep(999999)
 
@@ -70,18 +118,18 @@ for door in list(levels)[selected_door_index:]:
             pyautogui.press("left")
             print("\nlevel", level)
             steps = levels[door][level]
-            
+
             # Run the steps
             play_level(steps)
-            
+
             # Sleep after finishing a level, to give it time to load the next one
             # before we start scanning to see if we've gone to the next level.
             pyautogui.sleep(3)
-            
+
             # TODO: Test both methods and pick one. Currently level scanner is getting incorrect
             # scan results (thought level 2 pits was level 1), and chomp scanner is not running in time
             # (chomp is over before scanning starts)
-            
+
             # CHOMP METHOD: LEVEL IS WON WHEN WE SEE CHOMPS -------------------
             # Check for chomps, use colored red screenshots of the chomp screen
             # keep checking for chomps for like 10 seconds or something long
@@ -109,7 +157,7 @@ for door in list(levels)[selected_door_index:]:
             current_level = detect_level()
             if current_level == level:
                 print(current_level, level, "you died 💀")
-                pyautogui.press('space')
+                pyautogui.press("space")
                 # Reset the door and level since we may be stuck somewhere
                 # door, level, _ = detect_door_and_level()
                 # Reset the steps to whatever level we are now on

@@ -78,9 +78,10 @@ def detect_level():
 
 
 def detect_door_and_level():
+    door_confidence = 0.85
     # Manually select a level to use
     print("Looking for door...")
-    selected_door = finder("./door_screenshots/", confidence=0.75)
+    selected_door = finder("./door_screenshots/", confidence=door_confidence)
     print("Found door?", selected_door)
 
     if selected_door is None:
@@ -89,7 +90,7 @@ def detect_door_and_level():
         pyautogui.sleep(2)
         pyautogui.click()
         print("Looking for door again...")
-        selected_door = finder("./door_screenshots/", confidence=0.5)
+        selected_door = finder("./door_screenshots/", confidence=door_confidence)
         print("Found door?", selected_door)
 
 
