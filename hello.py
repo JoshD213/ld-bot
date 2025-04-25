@@ -2,6 +2,7 @@ import pyautogui
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -17,48 +18,77 @@ SESSION_FILE = "session.json"
 
 
 def save_session_info(driver):
-    session_info = {"url": driver.command_executor._url, "id": driver.session_id}
+    """Save the session information to a JSON file"""
+    session_info = {
+        "session_id": driver.session_id,
+        "executor_url": driver.command_executor._url,
+    }
+
     with open(SESSION_FILE, "w") as f:
         json.dump(session_info, f)
+    print(f"Session information saved: {driver.session_id}")
+    return session_info
 
 
 def load_session_info():
-    with open(SESSION_FILE, "r") as f:
-        return json.load(f)
+    """Load session information from a JSON file if it exists"""
+    if os.path.exists(SESSION_FILE):
+        with open(SESSION_FILE, "r") as f:
+            return json.load(f)
+    return None
 
 
-def attach_to_session(executor_url, session_id):
-    # Create a dummy driver just to hijack its session
-    driver = webdriver.Remote(command_executor=executor_url, desired_capabilities={})
-    driver.close()  # Close the new window
+def attach_to_existing_session(session_id, executor_url):
+    """Attach to an existing browser session"""
+    from selenium.webdriver.remote.webdriver import WebDriver
+
+    # Store the original execute method
+    original_execute = WebDriver.execute
+
+    # Define a new execute method that will intercept the newSession command
+    def new_command_execute(self, command, params=None):
+        if command == "newSession":
+            # Mock the response for newSession command
+            return {"success": 0, "value": {"sessionId": session_id}}
+        else:
+            return original_execute(self, command, params)
+
+    # Replace the execute method with our custom version
+    WebDriver.execute = new_command_execute
+
+    # Create a driver that will attach to the existing session
+    driver = webdriver.Remote(
+        command_executor=executor_url, options=webdriver.ChromeOptions()
+    )
+
+    # Set the session ID to the existing session
     driver.session_id = session_id
+
+    # Restore the original execute method
+    WebDriver.execute = original_execute
+
     return driver
 
 
-def set_up_driver():
-    driver = None
-    if os.path.exists(SESSION_FILE):
-        # Try to resume session
-        session = load_session_info()
-        try:
-            driver = attach_to_session(session["url"], session["id"])
-            # Test if session is still alive
-            driver.title  # Will raise if session is dead
-            print("Resumed existing session.")
-        except WebDriverException:
-            print("Session expired. Starting new browser.")
-            os.remove(SESSION_FILE)
-    if driver is None:
-        # Start new browser
-        # Configure Chrome options
-        options = Options()
-        # options.add_argument('--headless=new')
-        # options.add_argument("user-data-dir=path/to/your/custom/profile")
-        options.add_experimental_option("detach", True)
-        driver = webdriver.Chrome(options=options)
-        # RESUME HERE: AttributeError: 'ChromiumRemoteConnection' object has no attribute '_url'
-        save_session_info(driver)
-        print("Started new browser session.")
+def create_new_driver():
+    """Create a new Chrome driver in detached mode"""
+    options = Options()
+    options.add_experimental_option(
+        "detach", True
+    )  # Keep browser open after script ends
+    driver_service = Service(port=1234)
+    driver = webdriver.Chrome(service=driver_service, options=options)
+    driver.command_executor._url = "http://127.0.0.1:1234"
+    # Save the session information for later reuse
+    session_info = {
+        "session_id": driver.session_id,
+        "executor_url": driver.command_executor._url,
+    }
+
+    with open(SESSION_FILE, "w") as f:
+        json.dump(session_info, f)
+    print(f"Session information saved: {driver.session_id}")
+
     return driver
 
 
@@ -67,8 +97,26 @@ subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 
 loading_delay = 4
 
-# Initialize headless Chrome browser
-driver = set_up_driver()
+session_info = load_session_info()
+
+if session_info and session_info.get("session_id") and session_info.get("executor_url"):
+    try:
+        print(
+            f"Attempting to reattach to existing session: {session_info['session_id']}"
+        )
+        driver = attach_to_existing_session(
+            session_info["session_id"], session_info["executor_url"]
+        )
+        print("Successfully reattached to existing browser session!")
+    except Exception as e:
+        print(f"Failed to reattach to session: {e}")
+        print("Creating new browser session...")
+        driver = create_new_driver()
+else:
+    print("No existing session found. Creating new browser session...")
+    driver = create_new_driver()
+
+# BUG: attatched to browser but crashed
 
 # Navigate to a website
 driver.get("https://poki.com/en/g/level-devil")
