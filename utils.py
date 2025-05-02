@@ -68,11 +68,17 @@ def play_level(steps):
 
 
 def detect_level():
-    selected_level = finder("./level_screenshots/", confidence=0.93, grayscale=True, min_search_time=3)
+    selected_level = finder(
+        "./level_screenshots/", confidence=0.93, grayscale=True, min_search_time=3
+    )
     # The screenshots are numbered by the actual level number, but our loop
     # starts at zero instead of one, so we need to -1 the number from the screenshot.
     # selected_level = str(int(selected_level) - 1)
     print("Found level?", selected_level)
+
+    if selected_level is None:
+        selected_level = "1"
+        print("couldnt find level falling back to 1")
 
     return selected_level
 
@@ -87,14 +93,16 @@ def detect_door_and_level():
     if selected_door is None:
         print("No doors found, going to map.")
         pyautogui.moveTo(140, 175, duration=0.5)
+        pyautogui.click()
+        pyautogui.sleep(0.5)
+        pyautogui.moveTo(750, 500, duration=0.5)
         pyautogui.sleep(2)
         pyautogui.click()
         print("Looking for door again...")
         selected_door = finder("./door_screenshots/", confidence=door_confidence)
         print("Found door?", selected_door)
 
-
-        # if door is still not found select default door   
+        # if door is still not found select default door
         if selected_door is None:
             selected_door = "pits"
 
@@ -109,3 +117,14 @@ def detect_door_and_level():
 
     print("Final answer:", selected_door, selected_door_index, selected_level)
     return selected_door, selected_level, selected_door_index
+
+
+def find_color_on_screen():
+    color = (252, 247, 125)
+
+    s = pyautogui.screenshot()
+    for x in range(s.width):
+        for y in range(s.height):
+            if s.getpixel((x, y)) == color:
+                pyautogui.click(x, y)
+                
