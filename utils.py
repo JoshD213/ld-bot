@@ -3,6 +3,7 @@ import time
 import os
 from PIL import UnidentifiedImageError
 from level_timings import levels
+from level_timings import door_positions
 
 
 def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
@@ -83,38 +84,54 @@ def detect_level():
     return selected_level
 
 
+# def detect_door_and_level():
+#     door_confidence = 0.85
+#     # Manually select a level to use
+#     print("Looking for door...")
+#     selected_door = finder("./door_screenshots/", confidence=door_confidence)
+#     print("Found door?", selected_door)
+
+#     if selected_door is None:
+#         print("No doors found, going to map.")
+#         pyautogui.moveTo(140, 175, duration=0.5)
+#         pyautogui.click()
+#         pyautogui.sleep(0.5)
+#         pyautogui.moveTo(750, 500, duration=0.5)
+#         pyautogui.sleep(2)
+#         pyautogui.click()
+#         print("Looking for door again...")
+#         selected_door = finder("./door_screenshots/", confidence=door_confidence)
+#         print("Found door?", selected_door)
+
+#         # if door is still not found select default door
+#         if selected_door is None:
+#             selected_door = "pits"
+
+#     selected_door_index = list(levels.keys()).index(selected_door)
+#     print("Selected door index", selected_door_index)
+
+#     pyautogui.press("space")
+#     time.sleep(3)
+#     print("Looking for level number...")
+
+#     selected_level = detect_level()
+
+#     print("Final answer:", selected_door, selected_door_index, selected_level)
+#     return selected_door, selected_level, selected_door_index
+
+
 def detect_door_and_level():
-    door_confidence = 0.85
-    # Manually select a level to use
-    print("Looking for door...")
-    selected_door = finder("./door_screenshots/", confidence=door_confidence)
-    print("Found door?", selected_door)
+    s = pyautogui.screenshot()
+    color = (252, 247, 125)
 
-    if selected_door is None:
-        print("No doors found, going to map.")
-        pyautogui.moveTo(140, 175, duration=0.5)
-        pyautogui.click()
-        pyautogui.sleep(0.5)
-        pyautogui.moveTo(750, 500, duration=0.5)
-        pyautogui.sleep(2)
-        pyautogui.click()
-        print("Looking for door again...")
-        selected_door = finder("./door_screenshots/", confidence=door_confidence)
-        print("Found door?", selected_door)
-
-        # if door is still not found select default door
-        if selected_door is None:
-            selected_door = "pits"
-
+    for door in door_positions.keys():
+        x, y = door_positions[door]
+        if s.getpixel((x, y)) == color:
+            selected_door = door
+            break
     selected_door_index = list(levels.keys()).index(selected_door)
     print("Selected door index", selected_door_index)
-
-    pyautogui.press("space")
-    time.sleep(3)
-    print("Looking for level number...")
-
     selected_level = detect_level()
-
     print("Final answer:", selected_door, selected_door_index, selected_level)
     return selected_door, selected_level, selected_door_index
 
@@ -127,4 +144,3 @@ def find_color_on_screen():
         for y in range(s.height):
             if s.getpixel((x, y)) == color:
                 pyautogui.click(x, y)
-                

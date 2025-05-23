@@ -123,7 +123,7 @@ driver.get("https://poki.com/en/g/level-devil")
 
 # If you want to debug issues or take screenshots, uncomment this line to
 # keep the testing browser open
-# time.sleep(999999)
+time.sleep(999999)
 
 fs_button = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))

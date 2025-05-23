@@ -213,3 +213,21 @@ levels = {
         ],
     },
 }
+
+door_positions = {
+    "pits": (155, 538),
+    "spikes": (313, 493),
+    "push": (495, 506),
+    "coins": (627, 583),
+    "controls": (541, 720),
+    "platforms": (587, 865),
+    "springs": (760, 847),
+    "warps": (862, 725),
+    "scale": (837, 574),
+    "doors": (959, 504),
+    "saws": (1084, 613),
+    "flappy": (1128, 771),
+    "gravity": (1215, 885),
+    "movement": (1370, 900),
+    "wraparound": (1435, 762),
+}
