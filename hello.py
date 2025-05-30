@@ -95,6 +95,8 @@ def create_new_driver():
 # delete any debugging screenshots
 subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 
+os.remove("session.json")
+
 loading_delay = 4
 
 session_info = load_session_info()
@@ -123,7 +125,7 @@ driver.get("https://poki.com/en/g/level-devil")
 
 # If you want to debug issues or take screenshots, uncomment this line to
 # keep the testing browser open
-time.sleep(999999)
+# time.sleep(999999)
 
 fs_button = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
@@ -137,7 +139,7 @@ fs_button.click()
 # )
 # center = pyautogui.center(location)
 pyautogui.moveTo(600, 670, duration=0.5)
-pyautogui.sleep(8)
+pyautogui.sleep(10)
 pyautogui.click()
 
 # reset the keyss incase one is sstill being pressed
@@ -204,6 +206,7 @@ for door in list(levels)[selected_door_index:]:
 
             # LEVEL SCAN METHOD -----------------------------------------------
             # Check if the level number changed, and if so, we won!
+            print("checking if we completed or died")
             current_level = detect_level()
             if current_level == level:
                 print(current_level, level, "you died 💀")
