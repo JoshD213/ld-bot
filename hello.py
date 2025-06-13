@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import subprocess
 from level_timings import levels
-from utils import finder, play_level, detect_door_and_level, detect_level
+from utils import click_door, play_level, detect_door_and_level, detect_level
 import os
 import json
 from selenium import webdriver
@@ -156,10 +156,8 @@ selected_door, selected_level, selected_door_index = detect_door_and_level()
 # loop over doors
 for door in list(levels)[selected_door_index:]:
     print("\n\ndoor", door)
+    click_door(selected_door)
     time.sleep(loading_delay)
-    pyautogui.moveTo(150, 540, duration=0.5)
-    pyautogui.click()
-    # pyautogui.press("space")
     selected_level_index = list(levels[door].keys()).index(selected_level)
 
     # loop over levels
@@ -206,7 +204,7 @@ for door in list(levels)[selected_door_index:]:
 
             # LEVEL SCAN METHOD -----------------------------------------------
             # Check if the level number changed, and if so, we won!
-            print("checking if we completed or died")
+            print("checking if we completed or died ")
             current_level = detect_level()
             if current_level == level:
                 print(current_level, level, "you died 💀")
@@ -219,5 +217,5 @@ for door in list(levels)[selected_door_index:]:
                 break
             # END LEVEL SCAN METHOD -------------------------------------------
 
-            # fix transition between doors
-            # get this working before working on more advanced stuff
+    selected_door, selected_level, _ = detect_door_and_level()
+

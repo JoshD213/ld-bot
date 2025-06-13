@@ -123,29 +123,32 @@ def detect_level():
 def detect_door_and_level():
     # Manually select a level to use
     print("Looking for pause button...")
-    pause_location = pyautogui.locateOnScreen(
-        "general_screenshots/pause.png",
-        confidence=0.7,
-        minSearchTime=3,
-        grayscale=True,
-    )
+    try:
+        pause_location = pyautogui.locateOnScreen(
+            "general_screenshots/pause.png",
+            confidence=0.7,
+            minSearchTime=3,
+            grayscale=True,
+        )
 
-    if pause_location:
-        print("pause button found, going to map.")
-        pyautogui.moveTo(140, 175, duration=0.5)
-        pyautogui.click()
-        pyautogui.sleep(0.5)
-        pyautogui.moveTo(750, 500, duration=0.5)
-        pyautogui.sleep(2)
-        pyautogui.click()
-        
+        if pause_location:
+            print("pause button found, going to map.")
+            pyautogui.moveTo(140, 175, duration=0.5)
+            pyautogui.click()
+            pyautogui.sleep(0.5)
+            pyautogui.moveTo(750, 500, duration=0.5)
+            pyautogui.sleep(2)
+            pyautogui.click()
+    except pyautogui.ImageNotFoundException:
+        print("pause button not found, assuming already on map")
+
     pyautogui.sleep(2)
 
     s = pyautogui.screenshot()
     color = (252, 247, 125)
     selected_door = "pits"
     # make sure mouse isnt hovering over a door
-    # so we dont affect door colors  
+    # so we dont affect door colors
     pyautogui.moveTo(10, 10)
 
     for door in door_positions.keys():
@@ -159,6 +162,11 @@ def detect_door_and_level():
     selected_level = detect_level()
     print("Final answer:", selected_door, selected_door_index, selected_level)
     return selected_door, selected_level, selected_door_index
+
+
+def click_door(door_name):
+    x, y = door_positions[door_name]
+    pyautogui.click(x, y)
 
 
 def find_color_on_screen():

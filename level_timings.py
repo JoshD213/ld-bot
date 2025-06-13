@@ -1,7 +1,7 @@
-
+# TODO: move this to a confige file to change while bot is running
 levels = {
     "pits": {
-        "1": [("keyDown", "right"), 2, "up"],
+        "1": [("keyDown", "right"), 2.6, "up"],
         "2": [("keyDown", "right"), 2, "up", 0.4, "up"],
         "3": [("keyDown", "right"), 1, "up"],
         "4": [
