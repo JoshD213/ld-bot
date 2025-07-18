@@ -8,11 +8,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import subprocess
 from level_timings import levels
-from utils import click_door, play_level, detect_door_and_level, detect_level
+from utils import (
+    click_door, play_level, 
+    detect_door_and_level, 
+    detect_level, detect_if_on_map
+)
 import os
 import json
-from selenium import webdriver
-from selenium.common.exceptions import WebDriverException
 
 SESSION_FILE = "session.json"
 
@@ -131,13 +133,7 @@ fs_button = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
 )
 fs_button.click()
-# print(f"Move your focus to the window, you have {loading_delay} seconds!")
-# time.sleep(loading_delay)
 
-# location = pyautogui.locateOnScreen(
-# "general_screenshots/1player.png", confidence=0.8, minSearchTime=10
-# )
-# center = pyautogui.center(location)
 pyautogui.moveTo(600, 670, duration=0.5)
 pyautogui.sleep(10)
 pyautogui.click()
@@ -176,46 +172,29 @@ for door in list(levels)[selected_door_index:]:
             # before we start scanning to see if we've gone to the next level.
             pyautogui.sleep(3)
 
-            # TODO: Test both methods and pick one. Currently level scanner is getting incorrect
-            # scan results (thought level 2 pits was level 1), and chomp scanner is not running in time
-            # (chomp is over before scanning starts)
-
-            # CHOMP METHOD: LEVEL IS WON WHEN WE SEE CHOMPS -------------------
-            # Check for chomps, use colored red screenshots of the chomp screen
-            # keep checking for chomps for like 10 seconds or something long
-            # Once chomp is detected, delay exactly 5s or so (for the level to load), then proceed
-
-            # # use finder() on a folder with chomp screenshots in color
-            # chomp = finder("./general_screenshots/", confidence=0.5, min_search_time=10)
-
-            # # if chomp is detected, run this:
-            # if chomp:
-            #     time.sleep(loading_delay)
-            # else:
-            #     print("you died 💀")
-            #     # Reset the door and level since we may be stuck somewhere
-            #     door, level, _ = detect_door_and_level()
-            #     # Reset the steps to whatever level we are now on
-            #     steps = levels[door][level]
-
-            # if chomp is not detected but we waited over the time limit (10s),
-            # then assume we died and retry
-            # END CHOMP METHOD ------------------------------------------------
-
             # LEVEL SCAN METHOD -----------------------------------------------
             # Check if the level number changed, and if so, we won!
+            if level == "5" and detect_if_on_map():
+                print("Level 5 detected, and landed on the map")
+                break
+            
             print("checking if we completed or died ")
             current_level = detect_level()
             if current_level == level:
                 print(current_level, level, "you died 💀")
                 pyautogui.press("space")
-                # Reset the door and level since we may be stuck somewhere
-                # door, level, _ = detect_door_and_level()
-                # Reset the steps to whatever level we are now on
-                # steps = levels[door][level]
             else:
                 break
             # END LEVEL SCAN METHOD -------------------------------------------
 
-    selected_door, selected_level, _ = detect_door_and_level()
+    # If we're on the map, we just finished a door, so go to next door
+    if detect_if_on_map():
+        print("Going to next door")
+        door_names = list(levels.keys())
+        selected_door = door_names[door_names.index(door) + 1]
+        selected_level = "1"
+        selected_level_index = 0
+    else:
+        print("Unsure if ready for next door, scanning")
+        selected_door, selected_level, _ = detect_door_and_level()
 

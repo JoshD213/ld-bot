@@ -70,7 +70,7 @@ def play_level(steps):
 
 def detect_level():
     selected_level = finder(
-        "./level_screenshots/", confidence=0.93, grayscale=True, min_search_time=3
+        "./level_screenshots/", confidence=0.93, grayscale=True, min_search_time=1
     )
     # The screenshots are numbered by the actual level number, but our loop
     # starts at zero instead of one, so we need to -1 the number from the screenshot.
@@ -119,8 +119,7 @@ def detect_level():
 #     print("Final answer:", selected_door, selected_door_index, selected_level)
 #     return selected_door, selected_level, selected_door_index
 
-
-def detect_door_and_level():
+def detect_if_on_map():
     # Manually select a level to use
     print("Looking for pause button...")
     try:
@@ -132,33 +131,50 @@ def detect_door_and_level():
         )
 
         if pause_location:
-            print("pause button found, going to map.")
-            pyautogui.moveTo(140, 175, duration=0.5)
-            pyautogui.click()
-            pyautogui.sleep(0.5)
-            pyautogui.moveTo(750, 500, duration=0.5)
-            pyautogui.sleep(2)
-            pyautogui.click()
+            return False
     except pyautogui.ImageNotFoundException:
         print("pause button not found, assuming already on map")
+    
+    return True
 
+def detect_door_and_level():
+    # If not on the map, go to the map
+    if not detect_if_on_map():
+        print("pause button found, going to map.")
+        pyautogui.moveTo(140, 175, duration=0.5)
+        pyautogui.click()
+        pyautogui.sleep(0.5)
+        pyautogui.moveTo(750, 500, duration=0.5)
+        pyautogui.sleep(2)
+        pyautogui.click()
+    
+    # Let the map load
     pyautogui.sleep(2)
 
     s = pyautogui.screenshot()
-    color = (252, 247, 125)
+    # Color of the current door, coded by RGBA
+    color = (252, 247, 125, 255)
+    # Fallback door in case one isn't found
     selected_door = "pits"
-    # make sure mouse isnt hovering over a door
-    # so we dont affect door colors
-    pyautogui.moveTo(10, 10)
+    # Make sure mouse isnt hovering over a door
+    # because it changes the color 
+    pyautogui.moveTo(100, 100, duration=0.5)
 
+    print("Scanning door colors")
     for door in door_positions.keys():
         x, y = door_positions[door]
-        if s.getpixel((x, y)) == color:
+        color_found = s.getpixel((x, y))
+        print(f"{door}: color is {color_found}")
+        if color_found == color:
+            print("Found door!", door)
             selected_door = door
             break
+
     selected_door_index = list(levels.keys()).index(selected_door)
     print("Selected door index", selected_door_index)
+    
     pyautogui.sleep(3)
+    
     selected_level = detect_level()
     print("Final answer:", selected_door, selected_door_index, selected_level)
     return selected_door, selected_level, selected_door_index

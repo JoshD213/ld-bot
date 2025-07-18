@@ -133,6 +133,7 @@ levels = {
             0.1,
             "up",
         ],
+        # Coins5 fails to complete, dies in diff places each time
         "5": [
             2,
             ("keyDown", "right"),
