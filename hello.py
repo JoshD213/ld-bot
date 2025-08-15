@@ -97,7 +97,10 @@ def create_new_driver():
 # delete any debugging screenshots
 subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 
-os.remove("session.json")
+try:
+    os.remove("session.json")
+except FileNotFoundError:
+    pass
 
 loading_delay = 4
 

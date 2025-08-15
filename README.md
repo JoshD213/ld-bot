@@ -9,7 +9,7 @@
 ## todo
 
 - failing to attach to existing browser
-- WIP move from detecting door images to finding door color see utils.py
+- ~~WIP move from detecting door images to finding door color see utils.py~~
 
 ## Problems:
 
