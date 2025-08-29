@@ -178,8 +178,8 @@ levels = {
             ("keyDown", "left"),
         ],
         "2": [
-            ("keyDown", "left"),
-            0.5,
+            ("keyDown", "right"),
+            0.2,
             "up",
             0.5,
             "up",

@@ -3,8 +3,8 @@ import time
 from level_timings import levels
 
 # Manually select a level to use
-selected_door = input("Which door are you playing? (default: pits)") or "pits"
-selected_level = input("Which level are you playing? (default: 1)") or "1"
+selected_door = input("Which door are you playing? (default: pits)") or "controls"
+selected_level = input("Which level are you playing? (default: 1)") or "2"
 # timings = levels[door][level]
 loading_delay = 5
 

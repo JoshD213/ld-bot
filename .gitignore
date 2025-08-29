@@ -162,4 +162,5 @@ cython_debug/
 #.idea/
 debugging_screenshots/*
 
-session.json
+# Our folder for storing the chrome cache
+ChromeProfile/*

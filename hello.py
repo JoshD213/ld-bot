@@ -1,13 +1,10 @@
 import pyautogui
 import time
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
+from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import subprocess
-import socket
 from level_timings import levels
 from utils import (
     click_door,
@@ -15,105 +12,11 @@ from utils import (
     detect_door_and_level,
     detect_level,
     detect_if_on_map,
+    is_webdriver_service_running,
 )
-import os
-import json
 import logging
 
 logging.basicConfig(level=logging.INFO)
-
-SESSION_FILE = "session.json"
-
-
-def save_session_info(driver):
-    """Save the session information to a JSON file"""
-    session_info = {
-        "session_id": driver.session_id,
-        "executor_url": driver.command_executor._url,
-    }
-
-    with open(SESSION_FILE, "w") as f:
-        json.dump(session_info, f)
-    print(f"Session information saved: {driver.session_id}")
-    return session_info
-
-
-def load_session_info():
-    """Load session information from a JSON file if it exists"""
-    if os.path.exists(SESSION_FILE):
-        with open(SESSION_FILE, "r") as f:
-            return json.load(f)
-    return None
-
-
-def is_webdriver_service_running(port=1234):
-    """Check if WebDriver service is running on specified port"""
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.settimeout(1)
-    result = sock.connect_ex(("127.0.0.1", port))
-    sock.close()
-
-    if result == 0:
-        logging.info(f"WebDriver service found on port {port}")
-        return True
-    else:
-        logging.info(f"No WebDriver service found on port {port}")
-        return False
-
-
-def attach_to_existing_session(session_id, executor_url):
-    """Attach to an existing browser session"""
-    from selenium.webdriver.remote.webdriver import WebDriver
-
-    # Store the original execute method
-    original_execute = WebDriver.execute
-
-    # Define a new execute method that will intercept the newSession command
-    def new_command_execute(self, command, params=None):
-        if command == "newSession":
-            # Mock the response for newSession command
-            return {"success": 0, "value": {"sessionId": session_id}}
-        else:
-            return original_execute(self, command, params)
-
-    # Replace the execute method with our custom version
-    WebDriver.execute = new_command_execute
-
-    # Create a driver that will attach to the existing session
-    driver = webdriver.Remote(
-        command_executor=executor_url, options=webdriver.ChromeOptions()
-    )
-
-    # Set the session ID to the existing session
-    driver.session_id = session_id
-
-    # Restore the original execute method
-    WebDriver.execute = original_execute
-
-    return driver
-
-
-def create_new_driver():
-    """Create a new Chrome driver in detached mode"""
-    options = Options()
-    options.add_experimental_option(
-        "detach", True
-    )  # Keep browser open after script ends
-    driver_service = Service(port=1234)
-    driver = webdriver.Chrome(service=driver_service, options=options)
-    driver.command_executor._url = "http://127.0.0.1:1234"
-    # Save the session information for later reuse
-    session_info = {
-        "session_id": driver.session_id,
-        "executor_url": driver.command_executor._url,
-    }
-
-    with open(SESSION_FILE, "w") as f:
-        json.dump(session_info, f)
-    print(f"Session information saved: {driver.session_id}")
-
-    return driver
 
 
 def main():
@@ -124,42 +27,35 @@ def main():
 
     loading_delay = 4
 
-    session_info = load_session_info()
+    # Check if Chrome and WebDriver service are running
+    webdriver_running = is_webdriver_service_running()
 
-    if (
-        session_info
-        and session_info.get("session_id")
-        and session_info.get("executor_url")
-    ):
-        logging.info(f"Found session file with ID: {session_info['session_id']}")
+    if not webdriver_running:
+        logging.info(
+            f"Browser prerequisites not met - WebDriver: {webdriver_running}"
+        )
+        logging.info("Creating new browser session...")
 
-        # Check if Chrome and WebDriver service are running
-        webdriver_running = is_webdriver_service_running()
+        # Launch the browser
+        subprocess.Popen("make chrome", shell=True)
 
-        if webdriver_running:
-            logging.info("WebDriver service detected, attempting reattachment...")
-            driver = attach_to_existing_session(
-                session_info["session_id"], session_info["executor_url"]
-            )
-            # Test the connection
-            driver.current_url
-            logging.info("Successfully reattached to existing browser session!")
-        else:
-            logging.info(
-                f"Browser prerequisites not met - WebDriver: {webdriver_running}"
-            )
-            logging.info("Creating new browser session...")
-            driver = create_new_driver()
-    else:
-        logging.info("No existing session found. Creating new browser session...")
-        driver = create_new_driver()
+    logging.info("WebDriver should be running now, attempting attachment...")
 
+    options = ChromeOptions()
+    options.add_experimental_option("debuggerAddress", "localhost:9000")
+    driver = Chrome(options=options)
+
+    # Test the connection
+    driver.current_url
+    logging.info("Successfully attached to browser!")
     # Navigate to a website
     driver.get("https://poki.com/en/g/level-devil")
 
     # If you want to debug issues or take screenshots, uncomment this line to
     # keep the testing browser open
     # time.sleep(999999)
+
+    # TODO: When reattaching, the browser needs to gain focus in the OS.
 
     fs_button = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
@@ -175,9 +71,6 @@ def main():
     pyautogui.press("left")
 
     selected_door, selected_level, selected_door_index = detect_door_and_level()
-
-    # BUG: Currently we check if dead too fast, and on pits door 4, we
-    # assume death even though success, and reset to 1 due to door selector.
 
     # TODO: These loops need to become WHILE loops, so we can dynamically
     # change levels if needed rather than always going in order.

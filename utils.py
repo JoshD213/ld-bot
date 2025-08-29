@@ -4,6 +4,11 @@ import os
 from PIL import UnidentifiedImageError
 from level_timings import levels
 from level_timings import door_positions
+import socket
+import logging
+
+
+SESSION_FILE = "session.pickle"
 
 
 def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
@@ -119,6 +124,7 @@ def detect_level():
 #     print("Final answer:", selected_door, selected_door_index, selected_level)
 #     return selected_door, selected_level, selected_door_index
 
+
 def detect_if_on_map():
     # Manually select a level to use
     print("Looking for pause button...")
@@ -134,8 +140,9 @@ def detect_if_on_map():
             return False
     except pyautogui.ImageNotFoundException:
         print("pause button not found, assuming already on map")
-    
+
     return True
+
 
 def detect_door_and_level():
     # If not on the map, go to the map
@@ -147,7 +154,7 @@ def detect_door_and_level():
         pyautogui.moveTo(750, 500, duration=0.5)
         pyautogui.sleep(2)
         pyautogui.click()
-    
+
     # Let the map load
     pyautogui.sleep(2)
 
@@ -157,7 +164,7 @@ def detect_door_and_level():
     # Fallback door in case one isn't found
     selected_door = "pits"
     # Make sure mouse isnt hovering over a door
-    # because it changes the color 
+    # because it changes the color
     pyautogui.moveTo(100, 100, duration=0.5)
 
     print("Scanning door colors")
@@ -172,9 +179,9 @@ def detect_door_and_level():
 
     selected_door_index = list(levels.keys()).index(selected_door)
     print("Selected door index", selected_door_index)
-    
+
     pyautogui.sleep(3)
-    
+
     selected_level = detect_level()
     print("Final answer:", selected_door, selected_door_index, selected_level)
     return selected_door, selected_level, selected_door_index
@@ -193,3 +200,23 @@ def find_color_on_screen():
         for y in range(s.height):
             if s.getpixel((x, y)) == color:
                 pyautogui.click(x, y)
+
+
+
+
+def is_webdriver_service_running(port=9000):
+    """Check if WebDriver service is running on specified port"""
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(1)
+    result = sock.connect_ex(("127.0.0.1", port))
+    sock.close()
+
+    if result == 0:
+        logging.info(f"WebDriver service found on port {port}")
+        return True
+    else:
+        logging.info(f"No WebDriver service found on port {port}")
+        return False
+
+
