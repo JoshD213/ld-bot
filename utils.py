@@ -148,10 +148,10 @@ def detect_door_and_level():
     # If not on the map, go to the map
     if not detect_if_on_map():
         print("pause button found, going to map.")
-        pyautogui.moveTo(140, 175, duration=0.5)
+        pyautogui.moveTo(140 - 51, 175 - 51, duration=0.5)
         pyautogui.click()
         pyautogui.sleep(0.5)
-        pyautogui.moveTo(750, 500, duration=0.5)
+        pyautogui.moveTo(750 - 51, 500 - 51, duration=0.5)
         pyautogui.sleep(2)
         pyautogui.click()
 
@@ -165,11 +165,13 @@ def detect_door_and_level():
     selected_door = "pits"
     # Make sure mouse isnt hovering over a door
     # because it changes the color
-    pyautogui.moveTo(100, 100, duration=0.5)
+    pyautogui.moveTo(100 - 51, 100 - 51, duration=0.5)
 
     print("Scanning door colors")
     for door in door_positions.keys():
         x, y = door_positions[door]
+        x -= 51
+        y -= 51
         color_found = s.getpixel((x, y))
         print(f"{door}: color is {color_found}")
         if color_found == color:
@@ -189,6 +191,8 @@ def detect_door_and_level():
 
 def click_door(door_name):
     x, y = door_positions[door_name]
+    x -= 51
+    y -= 51
     pyautogui.click(x, y)
 
 
@@ -200,8 +204,6 @@ def find_color_on_screen():
         for y in range(s.height):
             if s.getpixel((x, y)) == color:
                 pyautogui.click(x, y)
-
-
 
 
 def is_webdriver_service_running(port=9000):
@@ -218,5 +220,3 @@ def is_webdriver_service_running(port=9000):
     else:
         logging.info(f"No WebDriver service found on port {port}")
         return False
-
-

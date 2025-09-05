@@ -8,6 +8,7 @@
 
 ## todo
 
+- since chromium does not have black bars on the sides, nor a "chrome for testing" banner on the top...move all coordinate clicks -51 pixels in both x and y
 - ~~failing to attach to existing browser~~
 - create dock app
 - ~~WIP move from detecting door images to finding door color see utils.py~~

@@ -55,14 +55,17 @@ def main():
     # keep the testing browser open
     # time.sleep(999999)
 
-    # TODO: When reattaching, the browser needs to gain focus in the OS.
+    # When reattaching, the browser needs to gain focus in the OS. This is not
+    # necessary now that we're using reusing Chromium on each run instead of 
+    # creating new selenium chrome instances every run
+    # os.system('osascript -e \'tell application "Chromium" to activate\'')
 
     fs_button = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
     )
     fs_button.click()
 
-    pyautogui.moveTo(600, 670, duration=0.5)
+    pyautogui.moveTo(578, 668, duration=0.5)
     pyautogui.sleep(10)
     pyautogui.click()
 
