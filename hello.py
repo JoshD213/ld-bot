@@ -31,10 +31,10 @@ def main():
     webdriver_running = is_webdriver_service_running()
 
     if not webdriver_running:
-        logging.info(
+        logging.warning(
             f"Browser prerequisites not met - WebDriver: {webdriver_running}"
         )
-        logging.info("Creating new browser session...")
+        logging.warning("Creating new browser session...")
 
         # Launch the browser
         subprocess.Popen("make chrome", shell=True)
@@ -79,7 +79,7 @@ def main():
     # change levels if needed rather than always going in order.
     # loop over doors
     for door in list(levels)[selected_door_index:]:
-        print("\n\ndoor", door)
+        logging.info(f"\n\ndoor {door}")
         click_door(selected_door)
         time.sleep(loading_delay)
         selected_level_index = list(levels[door].keys()).index(selected_level)
@@ -89,8 +89,10 @@ def main():
             while True:
                 time.sleep(loading_delay)
                 pyautogui.press("right")
+                logging.debug("pressed right")
                 pyautogui.press("left")
-                print("\nlevel", level)
+                logging.debug("pressed left")
+                logging.info(f"\nlevel {level}")
                 steps = levels[door][level]
 
                 # Run the steps
@@ -103,13 +105,13 @@ def main():
                 # LEVEL SCAN METHOD -----------------------------------------------
                 # Check if the level number changed, and if so, we won!
                 if level == "5" and detect_if_on_map():
-                    print("Level 5 detected, and landed on the map")
+                    logging.info("Level 5 detected, and landed on the map")
                     break
 
-                print("checking if we completed or died ")
+                logging.info("checking if we completed or died ")
                 current_level = detect_level()
                 if current_level == level:
-                    print(current_level, level, "you died 💀")
+                    logging.info(f"{current_level}, {level}, you died 💀")
                     pyautogui.press("space")
                 else:
                     break
@@ -117,13 +119,13 @@ def main():
 
         # If we're on the map, we just finished a door, so go to next door
         if detect_if_on_map():
-            print("Going to next door")
+            logging.info("Going to next door")
             door_names = list(levels.keys())
             selected_door = door_names[door_names.index(door) + 1]
             selected_level = "1"
             selected_level_index = 0
         else:
-            print("Unsure if ready for next door, scanning")
+            logging.info("Unsure if ready for next door, scanning")
             selected_door, selected_level, _ = detect_door_and_level()
 
 

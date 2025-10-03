@@ -1,7 +1,6 @@
 import pyautogui
 import time
 import os
-from PIL import UnidentifiedImageError
 from level_timings import levels
 from level_timings import door_positions
 import socket
@@ -40,13 +39,14 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
                 )
                 match_screenshot.save(match_filename)
 
-                print("Screenshot found at location", location)
-                print(f"Match screenshot saved as {match_filename}")
+                logging.info(f"Screenshot found at location {location}")
+                logging.info(f"Match screenshot saved as {match_filename}")
 
                 return screenshot.split("/")[-1].split(".")[0]
         # If the image we're looking for can't be found, or,
         # if the debugging screenshot can't be saved, keep looping
-        except (pyautogui.ImageNotFoundException, UnidentifiedImageError):
+        except (pyautogui.ImageNotFoundException) as err:
+            logging.error(err)
             continue
     return None
 
@@ -54,7 +54,7 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
 def play_level(steps):
     # Loop over each item in this level
     for step in steps:
-        print("step", step)
+        logging.info(f"step {step}")
 
         # If it's an integer or float, sleep that amount of time
         if isinstance(step, int) or isinstance(step, float):
@@ -75,16 +75,16 @@ def play_level(steps):
 
 def detect_level():
     selected_level = finder(
-        "./level_screenshots/", confidence=0.93, grayscale=True, min_search_time=1
+        "./level_screenshots/", confidence=0.85, grayscale=True, min_search_time=1
     )
     # The screenshots are numbered by the actual level number, but our loop
     # starts at zero instead of one, so we need to -1 the number from the screenshot.
     # selected_level = str(int(selected_level) - 1)
-    print("Found level?", selected_level)
+    logging.info(f"Found level? {selected_level}")
 
     if selected_level is None:
         selected_level = "1"
-        print("couldnt find level falling back to 1")
+        logging.warning("couldnt find level falling back to 1")
 
     return selected_level
 
@@ -92,42 +92,42 @@ def detect_level():
 # def detect_door_and_level():
 #     door_confidence = 0.85
 #     # Manually select a level to use
-#     print("Looking for door...")
+#     logging.info("Looking for door...")
 #     selected_door = finder("./door_screenshots/", confidence=door_confidence)
-#     print("Found door?", selected_door)
+#     logging.info("Found door?", selected_door)
 
 #     if selected_door is None:
-#         print("No doors found, going to map.")
+#         logging.info("No doors found, going to map.")
 #         pyautogui.moveTo(140, 175, duration=0.5)
 #         pyautogui.click()
 #         pyautogui.sleep(0.5)
 #         pyautogui.moveTo(750, 500, duration=0.5)
 #         pyautogui.sleep(2)
 #         pyautogui.click()
-#         print("Looking for door again...")
+#         logging.info("Looking for door again...")
 #         selected_door = finder("./door_screenshots/", confidence=door_confidence)
-#         print("Found door?", selected_door)
+#         logging.info("Found door?", selected_door)
 
 #         # if door is still not found select default door
 #         if selected_door is None:
 #             selected_door = "pits"
 
 #     selected_door_index = list(levels.keys()).index(selected_door)
-#     print("Selected door index", selected_door_index)
+#     logging.info("Selected door index", selected_door_index)
 
 #     pyautogui.press("space")
 #     time.sleep(3)
-#     print("Looking for level number...")
+#     logging.info("Looking for level number...")
 
 #     selected_level = detect_level()
 
-#     print("Final answer:", selected_door, selected_door_index, selected_level)
+#     logging.info("Final answer:", selected_door, selected_door_index, selected_level)
 #     return selected_door, selected_level, selected_door_index
 
 
 def detect_if_on_map():
     # Manually select a level to use
-    print("Looking for pause button...")
+    logging.info("Looking for pause button...")
     try:
         pause_location = pyautogui.locateOnScreen(
             "general_screenshots/pause.png",
@@ -139,7 +139,7 @@ def detect_if_on_map():
         if pause_location:
             return False
     except pyautogui.ImageNotFoundException:
-        print("pause button not found, assuming already on map")
+        logging.info("pause button not found, assuming already on map")
 
     return True
 
@@ -147,7 +147,7 @@ def detect_if_on_map():
 def detect_door_and_level():
     # If not on the map, go to the map
     if not detect_if_on_map():
-        print("pause button found, going to map.")
+        logging.info("pause button found, going to map.")
         pyautogui.moveTo(140 - 51, 175 - 51, duration=0.5)
         pyautogui.click()
         pyautogui.sleep(0.5)
@@ -167,25 +167,25 @@ def detect_door_and_level():
     # because it changes the color
     pyautogui.moveTo(100 - 51, 100 - 51, duration=0.5)
 
-    print("Scanning door colors")
+    logging.info("Scanning door colors")
     for door in door_positions.keys():
         x, y = door_positions[door]
         x -= 51
         y -= 51
         color_found = s.getpixel((x, y))
-        print(f"{door}: color is {color_found}")
+        logging.info(f"{door}: color is {color_found}")
         if color_found == color:
-            print("Found door!", door)
+            logging.info(f"Found door! {door}")
             selected_door = door
             break
 
     selected_door_index = list(levels.keys()).index(selected_door)
-    print("Selected door index", selected_door_index)
+    logging.info(f"Selected door index {selected_door_index}")
 
     pyautogui.sleep(3)
 
     selected_level = detect_level()
-    print("Final answer:", selected_door, selected_door_index, selected_level)
+    logging.info(f"Final answer: {selected_door}, {selected_door_index}, {selected_level}")
     return selected_door, selected_level, selected_door_index
 
 
