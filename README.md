@@ -9,7 +9,7 @@
 ## todo
 
 - since chromium does not have black bars on the sides, nor a "chrome for testing" banner on the top...move all coordinate clicks -51 pixels in both x and y
-- level detection not working need to try lowering the confidence utils.detect_level
+- level detection not working need to try lowering the confidence utils.detect_level, try alternate image detection librarys https://www.perplexity.ai/search/what-better-more-modern-altare-TdlVoNGZRFyJ6B8bi.J3jQ#2
 - ~~install add blocker in chromium to avoid end of level adds.~~
 - ~~failing to attach to existing browser~~
 - create dock app

@@ -5,6 +5,7 @@ from level_timings import levels
 from level_timings import door_positions
 import socket
 import logging
+import pyscreeze
 
 
 SESSION_FILE = "session.pickle"
@@ -18,7 +19,7 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
 
     for screenshot in level_screenshots:
         try:
-            location = pyautogui.locateOnScreen(
+            location = pyscreeze.locateOnScreen(
                 screenshot,
                 confidence=confidence,
                 minSearchTime=min_search_time,
@@ -45,7 +46,7 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
                 return screenshot.split("/")[-1].split(".")[0]
         # If the image we're looking for can't be found, or,
         # if the debugging screenshot can't be saved, keep looping
-        except (pyautogui.ImageNotFoundException) as err:
+        except (pyautogui.ImageNotFoundException,pyscreeze.ImageNotFoundException) as err:
             logging.error(err)
             continue
     return None
@@ -138,7 +139,7 @@ def detect_if_on_map():
 
         if pause_location:
             return False
-    except pyautogui.ImageNotFoundException:
+    except (pyautogui.ImageNotFoundException,pyscreeze.ImageNotFoundException):
         logging.info("pause button not found, assuming already on map")
 
     return True

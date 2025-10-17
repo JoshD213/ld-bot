@@ -4,8 +4,11 @@ from level_timings import levels
 import logging
 
 # Manually select a level to use
-selected_door = input("Which door are you playing? (default: pits)") or "controls"
-selected_level = input("Which level are you playing? (default: 1)") or "2"
+default_door = "pits"
+default_level = "1"
+selected_door = input(f"Which door are you playing? ({default_door})") or default_door
+selected_level = input(f"Which level are you playing? (default: {default_level})") or default_level
+# selected_level = int(selected_level)
 # timings = levels[door][level]
 loading_delay = 5
 
