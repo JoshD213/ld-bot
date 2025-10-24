@@ -164,3 +164,4 @@ debugging_screenshots/*
 
 # Our folder for storing the chrome cache
 ChromeProfile/*
+.DS_Store

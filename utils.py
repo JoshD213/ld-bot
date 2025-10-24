@@ -17,6 +17,10 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
     # Sort file list alphanumerically
     level_screenshots.sort()
 
+    # Take screenshot of entire screen, to see what the bot sees
+    pyautogui.screenshot().save("./debugging_screenshots/fullscreen.png")
+    logging.info("Debugging fullscreen screenshot taken!")
+
     for screenshot in level_screenshots:
         try:
             location = pyscreeze.locateOnScreen(
