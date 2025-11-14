@@ -40,6 +40,15 @@ wheels = [
 ]
 
 [[package]]
+name = "colorist"
+version = "1.8.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/9c/db92e3a4d14060c25c7f753a65679af48a439ec9f70bfda9d16fc0fb9302/colorist-1.8.7.tar.gz", hash = "sha256:b9b38d35fd7d313c0286892d399df6946ab6f33977a5bdf9bff73c6d7fd6bfb1", size = 22263 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8e/8d/1e9b6dfc456d39a26bb2785eaa66d6ffc2f62204f37bedb8651b7fc35c0b/colorist-1.8.7-py3-none-any.whl", hash = "sha256:2b7123d9cd0f62bc28b0d581cd2a7201cab4707572e35a37f4e257010b1296d3", size = 40345 },
+]
+
+[[package]]
 name = "h11"
 version = "0.14.0"
 source = { registry = "https://pypi.org/simple" }
@@ -62,6 +71,7 @@ name = "ld-bot"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "colorist" },
     { name = "opencv-python" },
     { name = "pillow" },
     { name = "pyautogui" },
@@ -71,6 +81,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "colorist", specifier = ">=1.8.7" },
     { name = "opencv-python", specifier = ">=4.10.0.84" },
     { name = "pillow", specifier = ">=11.0.0" },
     { name = "pyautogui", specifier = ">=0.9.54" },

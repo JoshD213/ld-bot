@@ -6,6 +6,7 @@ from level_timings import door_positions
 import socket
 import logging
 import pyscreeze
+from colorist import ColorRGB
 
 
 SESSION_FILE = "session.pickle"
@@ -32,6 +33,8 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
             if location:
                 # Extract coordinates from location tuple
                 left, top, width, height = location
+
+                logging.info(f"debug position {left}, {top}, {width}, {height}")
 
                 # Take screenshot of the matched region
                 match_screenshot = pyautogui.screenshot(
@@ -148,6 +151,12 @@ def detect_if_on_map():
 
     return True
 
+def is_retina_display():
+    """Returns true if the user's display is a retina display""" 
+    s = pyautogui.screenshot()
+    screenshot_size = s.size
+    screen_size = pyautogui.size()
+    return (screen_size != screenshot_size)
 
 def detect_door_and_level():
     # If not on the map, go to the map
@@ -164,8 +173,11 @@ def detect_door_and_level():
     pyautogui.sleep(2)
 
     s = pyautogui.screenshot()
-    # Color of the current door, coded by RGBA
-    color = (252, 247, 125, 255)
+    retina_display = is_retina_display()
+    logging.info(f"Retina display: {retina_display}")
+
+    # yellow Color of the 'current' door, coded by RGBA
+    color = (252, 247, 125)
     # Fallback door in case one isn't found
     selected_door = "pits"
     # Make sure mouse isnt hovering over a door
@@ -176,9 +188,14 @@ def detect_door_and_level():
     for door in door_positions.keys():
         x, y = door_positions[door]
 
-        color_found = s.getpixel((x, y))
-        logging.info(f"{door}: color is {color_found}")
-        if color_found == color:
+        if retina_display:
+            x = x * 2
+            y = y * 2
+
+        r, g, b, a = s.getpixel((x, y))
+        logging.info(f"{ColorRGB(r,g,b)}{door} color is {r},{g},{b},{a}{ColorRGB(r,g,b).OFF}")
+
+        if (r,g,b) == color:
             logging.info(f"Found door! {door}")
             selected_door = door
             break
@@ -199,14 +216,14 @@ def click_door(door_name):
     pyautogui.click(x, y)
 
 
-def find_color_on_screen():
-    color = (252, 247, 125)
+# def find_color_on_screen():
+#     color = (252, 247, 125)
 
-    s = pyautogui.screenshot()
-    for x in range(s.width):
-        for y in range(s.height):
-            if s.getpixel((x, y)) == color:
-                pyautogui.click(x, y)
+#     s = pyautogui.screenshot()
+#     for x in range(s.width):
+#         for y in range(s.height):
+#             if s.getpixel((x, y)) == color:
+#                 pyautogui.click(x, y)
 
 
 def is_webdriver_service_running(port=9000):
