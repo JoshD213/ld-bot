@@ -9,7 +9,7 @@ from level_timings import levels
 from utils import (
     click_door,
     play_level,
-    detect_door_and_level,
+    detect_door,
     detect_level,
     detect_if_on_map,
     is_webdriver_service_running,
@@ -73,7 +73,7 @@ def main():
     pyautogui.press("right")
     pyautogui.press("left")
 
-    selected_door, selected_level, selected_door_index = detect_door_and_level()
+    selected_door, selected_door_index = detect_door()
 
     # TODO: These loops need to become WHILE loops, so we can dynamically
     # change levels if needed rather than always going in order.
@@ -82,6 +82,9 @@ def main():
         logging.info(f"\n\ndoor {door}")
         click_door(selected_door)
         time.sleep(loading_delay)
+        
+        selected_level = detect_level()
+        logging.info(f"Final answer: {selected_door}, {selected_door_index}, {selected_level}")
         selected_level_index = list(levels[door].keys()).index(selected_level)
 
         # loop over levels
@@ -126,7 +129,8 @@ def main():
             selected_level_index = 0
         else:
             logging.info("Unsure if ready for next door, scanning")
-            selected_door, selected_level, _ = detect_door_and_level()
+            selected_door, _ = detect_door()
+            selected_level = detect_level()
 
 
 if __name__ == "__main__":

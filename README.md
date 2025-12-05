@@ -15,6 +15,7 @@
 - create dock app
 - ~~WIP move from detecting door images to finding door color see utils.py~~
 - ~~print out screenshot of entire screen to check for level detection errors~~
+- ~~scanning for levels before the we click on the door~~
 
 ## Problems:
 
@@ -25,4 +26,3 @@
 ~~ Trying to figure out why door detection and level detection are suddenly not working. Door color scanner seems to be finding weird colors, looks like maybe the x/y coordinates of our doors is off?~~
 
 ## CURRENT TASK:
-scanning for levels before the we click on the door

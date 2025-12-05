@@ -15,8 +15,13 @@ SESSION_FILE = "session.pickle"
 def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
     level_screenshots = [folder + file for file in os.listdir(folder)]
 
-    # Sort file list alphanumerically
+    # Sort file list alphanumerically then REVERSE!
+    # For some reason, the level detection image scanner is more accurate when checking
+    # images in reverse order (54321) versus forwards where we frequently got "detected 2"
+    # when on level "3" and so on.
     level_screenshots.sort()
+    level_screenshots.reverse()
+    logging.info(f"screenshot order: {level_screenshots}")
 
     # Take screenshot of entire screen, to see what the bot sees
     pyautogui.screenshot().save("./debugging_screenshots/fullscreen.png")
@@ -24,7 +29,7 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
 
     for screenshot in level_screenshots:
         try:
-            location = pyscreeze.locateOnScreen(
+            location = pyautogui.locateOnScreen(
                 screenshot,
                 confidence=confidence,
                 minSearchTime=min_search_time,
@@ -41,6 +46,8 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
                     region=(left, top, width, height)
                 )
 
+                # NOTE: If your debug screenshot is the wrong window, you may have switched apps right before it took it.
+                # Recommend you kill the app RIGHT after it takes the screenshot, using the mouse to screen corner shortcut
                 # Save the matched region screenshot
                 match_filename = (
                     f"./debugging_screenshots/match_{screenshot.split('/')[-1]}"
@@ -83,7 +90,7 @@ def play_level(steps):
 
 def detect_level():
     selected_level = finder(
-        "./level_screenshots/", confidence=0.85, grayscale=True, min_search_time=1
+        "./level_screenshots/", confidence=0.9, grayscale=True, min_search_time=2
     )
     # The screenshots are numbered by the actual level number, but our loop
     # starts at zero instead of one, so we need to -1 the number from the screenshot.
@@ -134,7 +141,9 @@ def detect_level():
 
 
 def detect_if_on_map():
-    # Manually select a level to use
+    """
+    Returns true if the map is open, returns false if on any other screen
+    """
     logging.info("Looking for pause button...")
     try:
         pause_location = pyautogui.locateOnScreen(
@@ -144,11 +153,17 @@ def detect_if_on_map():
             grayscale=True,
         )
 
+        # If pause button is visible, we're in a level, NOT on the map
         if pause_location:
+            logging.info("Pause button found! You are NOT on the map")
             return False
-    except (pyautogui.ImageNotFoundException,pyscreeze.ImageNotFoundException):
-        logging.info("pause button not found, assuming already on map")
-
+        
+    except (pyautogui.ImageNotFoundException, pyscreeze.ImageNotFoundException):
+        # Errors due to not finding pause button are expected, continue and
+        # return "True" (not on the map)
+        pass
+    
+    logging.info("pause button not found, assuming you are on the map")
     return True
 
 def is_retina_display():
@@ -158,7 +173,7 @@ def is_retina_display():
     screen_size = pyautogui.size()
     return (screen_size != screenshot_size)
 
-def detect_door_and_level():
+def detect_door():
     # If not on the map, go to the map
     if not detect_if_on_map():
         logging.info("pause button found, going to map.")
@@ -203,11 +218,7 @@ def detect_door_and_level():
     selected_door_index = list(levels.keys()).index(selected_door)
     logging.info(f"Selected door index {selected_door_index}")
 
-    pyautogui.sleep(3)
-
-    selected_level = detect_level()
-    logging.info(f"Final answer: {selected_door}, {selected_door_index}, {selected_level}")
-    return selected_door, selected_level, selected_door_index
+    return selected_door, selected_door_index
 
 
 def click_door(door_name):
