@@ -15,11 +15,13 @@ from utils import (
     is_webdriver_service_running,
 )
 import logging
+import rumps
 
 logging.basicConfig(level=logging.INFO)
 
 
 def main():
+    rumps.notification("bot is starting")
     # delete any debugging screenshots
     subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 

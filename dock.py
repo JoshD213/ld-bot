@@ -1,17 +1,15 @@
 import rumps
+from hello import main 
+from level_tester import level_tester
 
 class AwesomeStatusBarApp(rumps.App):
-    @rumps.clicked("Preferences")
-    def prefs(self, _):
-        rumps.alert("jk! no preferences available!")
+    @rumps.clicked("Run Bot")
+    def run_bot(self, _):
+        main()
 
-    @rumps.clicked("Silly button")
-    def onoff(self, sender):
-        sender.state = not sender.state
-
-    @rumps.clicked("Say hi")
-    def sayhi(self, _):
-        rumps.notification("Awesome title", "amazing subtitle", "hi!!1")
+    @rumps.clicked("level Tester")
+    def run_tester(self, _):
+        level_tester(doc_mode=True)
 
 if __name__ == "__main__":
     AwesomeStatusBarApp("ld-bot").run()
