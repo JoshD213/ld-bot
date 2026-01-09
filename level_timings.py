@@ -181,15 +181,56 @@ levels = {
             ("keyDown", "right"),
             0.2,
             "up",
-            0.5,
+            1,
             "up",
             0.5,
             "up",
+            0.8,
+            "up",
+        ],
+        "3": [
+            ("keyDown", "left"),
+            0.7,
+            "up",
+            0.8,
+            "up",
+            0.8,
+            "up",
+            0.8,
+            "up",
+        ],
+        "4": [("keyDown", "right"), 0.9, "up", 1.4, "up", 0.8, "up"],
+        "5": [
+            ("keyDown", "left"),
+            0.8,
+            "up",
+            0.5,
+            ("keyUp", "left"),
+            0.1,
+            ("keyDown", "right"),
+            0.5,
+            "up",
+            0.3,
+            ("keyUp", "right"),
+            0.1,
+            ("keyDown", "left"),
+            0.5,
+            "up",
+            0.4,
+            ("keyUp", "left"),
+            0.1,
+            ("keyDown", "right"),
             0.5,
             "up",
         ],
     },
-    
+    "platforms":{
+        "1": [
+            ("keyDown", "right"),
+            0.5,
+            ("keyUp", "right"),
+        ],
+    }
 }
 
 door_positions = {
@@ -208,5 +249,5 @@ door_positions = {
     "gravity": (1249, 857),
     "movement": (1413, 874),
     "wraparound": (1476, 721),
-    "final": (1411, 537)
+    "final": (1411, 537),
 }

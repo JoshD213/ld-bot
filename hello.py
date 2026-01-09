@@ -18,10 +18,10 @@ import logging
 import rumps
 
 logging.basicConfig(level=logging.INFO)
-
+ 
 
 def main():
-    rumps.notification("bot is starting")
+    # rumps.notification("bot is starting")
     # delete any debugging screenshots
     subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 
@@ -70,10 +70,6 @@ def main():
     pyautogui.moveTo(578, 668, duration=0.5)
     pyautogui.sleep(10)
     pyautogui.click()
-
-    # reset the keyss incase one is sstill being pressed
-    pyautogui.press("right")
-    pyautogui.press("left")
 
     selected_door, selected_door_index = detect_door()
 
