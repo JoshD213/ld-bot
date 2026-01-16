@@ -26,3 +26,4 @@
 ~~ Trying to figure out why door detection and level detection are suddenly not working. Door color scanner seems to be finding weird colors, looks like maybe the x/y coordinates of our doors is off?~~
 
 ## CURRENT TASK:
+instead of using pyqt5 to make overlays, which navigates away from fullscreen apps, we need to use css/js inside of our chromium browser to display message overlays inside the browser

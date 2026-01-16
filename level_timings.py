@@ -229,6 +229,8 @@ levels = {
             ("keyDown", "right"),
             0.5,
             ("keyUp", "right"),
+            6,
+            ("keyDown", "right"),
         ],
     }
 }

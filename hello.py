@@ -15,7 +15,6 @@ from utils import (
     is_webdriver_service_running,
 )
 import logging
-import rumps
 
 logging.basicConfig(level=logging.INFO)
  
