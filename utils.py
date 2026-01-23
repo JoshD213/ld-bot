@@ -7,9 +7,36 @@ import socket
 import logging
 import pyscreeze
 from colorist import ColorRGB
-
+import subprocess
+from selenium.webdriver import Chrome, ChromeOptions
 
 SESSION_FILE = "session.pickle"
+
+
+def connect_to_webdriver():
+    logging.info("Checking for existing browser session...")
+    # Check if Chrome and WebDriver service are running
+    webdriver_running = is_webdriver_service_running()
+
+    if not webdriver_running:
+        logging.warning(
+            f"Browser prerequisites not met - WebDriver: {webdriver_running}"
+        )
+        logging.warning("Creating new browser session...")
+
+        # Launch the browser
+        subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+
+    logging.info("WebDriver should be running now, attempting attachment...")
+
+    options = ChromeOptions()
+    options.add_experimental_option("debuggerAddress", "localhost:9000")
+    driver = Chrome(options=options)
+
+    # Test the connection
+    driver.current_url
+    logging.info("Successfully attached to browser!")
+    return driver
 
 
 def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
@@ -104,41 +131,6 @@ def detect_level():
     return selected_level
 
 
-# def detect_door_and_level():
-#     door_confidence = 0.85
-#     # Manually select a level to use
-#     logging.info("Looking for door...")
-#     selected_door = finder("./door_screenshots/", confidence=door_confidence)
-#     logging.info("Found door?", selected_door)
-
-#     if selected_door is None:
-#         logging.info("No doors found, going to map.")
-#         pyautogui.moveTo(140, 175, duration=0.5)
-#         pyautogui.click()
-#         pyautogui.sleep(0.5)
-#         pyautogui.moveTo(750, 500, duration=0.5)
-#         pyautogui.sleep(2)
-#         pyautogui.click()
-#         logging.info("Looking for door again...")
-#         selected_door = finder("./door_screenshots/", confidence=door_confidence)
-#         logging.info("Found door?", selected_door)
-
-#         # if door is still not found select default door
-#         if selected_door is None:
-#             selected_door = "pits"
-
-#     selected_door_index = list(levels.keys()).index(selected_door)
-#     logging.info("Selected door index", selected_door_index)
-
-#     pyautogui.press("space")
-#     time.sleep(3)
-#     logging.info("Looking for level number...")
-
-#     selected_level = detect_level()
-
-#     logging.info("Final answer:", selected_door, selected_door_index, selected_level)
-#     return selected_door, selected_level, selected_door_index
-
 
 def detect_if_on_map():
     """
@@ -225,16 +217,6 @@ def click_door(door_name):
     x, y = door_positions[door_name]
     
     pyautogui.click(x, y)
-
-
-# def find_color_on_screen():
-#     color = (252, 247, 125)
-
-#     s = pyautogui.screenshot()
-#     for x in range(s.width):
-#         for y in range(s.height):
-#             if s.getpixel((x, y)) == color:
-#                 pyautogui.click(x, y)
 
 
 def is_webdriver_service_running(port=9000):

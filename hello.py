@@ -1,6 +1,5 @@
 import pyautogui
 import time
-from selenium.webdriver import Chrome, ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -12,7 +11,7 @@ from utils import (
     detect_door,
     detect_level,
     detect_if_on_map,
-    is_webdriver_service_running,
+connect_to_webdriver
 )
 import logging
 
@@ -20,46 +19,18 @@ logging.basicConfig(level=logging.INFO)
  
 
 def main():
-    # rumps.notification("bot is starting")
     # delete any debugging screenshots
     subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
 
-    logging.info("Checking for existing browser session...")
-
-    loading_delay = 4
-
-    # Check if Chrome and WebDriver service are running
-    webdriver_running = is_webdriver_service_running()
-
-    if not webdriver_running:
-        logging.warning(
-            f"Browser prerequisites not met - WebDriver: {webdriver_running}"
-        )
-        logging.warning("Creating new browser session...")
-
-        # Launch the browser
-        subprocess.Popen("make chrome", shell=True)
-
-    logging.info("WebDriver should be running now, attempting attachment...")
-
-    options = ChromeOptions()
-    options.add_experimental_option("debuggerAddress", "localhost:9000")
-    driver = Chrome(options=options)
-
-    # Test the connection
-    driver.current_url
-    logging.info("Successfully attached to browser!")
+    # Create or reuse a Chromium webdriver
+    driver = connect_to_webdriver()
+    
     # Navigate to a website
     driver.get("https://poki.com/en/g/level-devil")
 
     # If you want to debug issues or take screenshots, uncomment this line to
     # keep the testing browser open
     # time.sleep(999999)
-
-    # When reattaching, the browser needs to gain focus in the OS. This is not
-    # necessary now that we're using reusing Chromium on each run instead of 
-    # creating new selenium chrome instances every run
-    # os.system('osascript -e \'tell application "Chromium" to activate\'')
 
     fs_button = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
@@ -71,9 +42,8 @@ def main():
     pyautogui.click()
 
     selected_door, selected_door_index = detect_door()
+    loading_delay = 4
 
-    # TODO: These loops need to become WHILE loops, so we can dynamically
-    # change levels if needed rather than always going in order.
     # loop over doors
     for door in list(levels)[selected_door_index:]:
         logging.info(f"\n\ndoor {door}")
