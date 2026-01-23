@@ -1,15 +1,19 @@
 import rumps
 from hello import main 
 from level_tester import level_tester
+from utils import connect_to_webdriver
 
 class AwesomeStatusBarApp(rumps.App):
+
     @rumps.clicked("Run Bot")
     def run_bot(self, _):
-        main()
+        driver = connect_to_webdriver()
+        main(driver)
 
     @rumps.clicked("level Tester")
     def run_tester(self, _):
-        level_tester(doc_mode=True)
+        driver = connect_to_webdriver()
+        level_tester(driver, dock_mode=True)
 
 if __name__ == "__main__":
     AwesomeStatusBarApp("ld-bot").run()

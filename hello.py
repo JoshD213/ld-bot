@@ -11,19 +11,15 @@ from utils import (
     detect_door,
     detect_level,
     detect_if_on_map,
-connect_to_webdriver
+    send_notification
 )
 import logging
 
 logging.basicConfig(level=logging.INFO)
- 
 
-def main():
+def main(driver):
     # delete any debugging screenshots
     subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
-
-    # Create or reuse a Chromium webdriver
-    driver = connect_to_webdriver()
     
     # Navigate to a website
     driver.get("https://poki.com/en/g/level-devil")
@@ -41,17 +37,17 @@ def main():
     pyautogui.sleep(10)
     pyautogui.click()
 
-    selected_door, selected_door_index = detect_door()
+    selected_door, selected_door_index = detect_door(driver)
     loading_delay = 4
 
     # loop over doors
     for door in list(levels)[selected_door_index:]:
-        logging.info(f"\n\ndoor {door}")
+        send_notification(f"\n\ndoor {door}", driver)
         click_door(selected_door)
         time.sleep(loading_delay)
         
-        selected_level = detect_level()
-        logging.info(f"Final answer: {selected_door}, {selected_door_index}, {selected_level}")
+        selected_level = detect_level(driver)
+        send_notification(f"Final answer: {selected_door}, {selected_door_index}, {selected_level}", driver)
         selected_level_index = list(levels[door].keys()).index(selected_level)
 
         # loop over levels
@@ -62,11 +58,11 @@ def main():
                 logging.debug("pressed right")
                 pyautogui.press("left")
                 logging.debug("pressed left")
-                logging.info(f"\nlevel {level}")
+                send_notification(f"\nlevel {level}", driver)
                 steps = levels[door][level]
 
                 # Run the steps
-                play_level(steps)
+                play_level(driver, steps)
 
                 # Sleep after finishing a level, to give it time to load the next one
                 # before we start scanning to see if we've gone to the next level.
@@ -74,31 +70,34 @@ def main():
 
                 # LEVEL SCAN METHOD -----------------------------------------------
                 # Check if the level number changed, and if so, we won!
-                if level == "5" and detect_if_on_map():
-                    logging.info("Level 5 detected, and landed on the map")
+                if level == "5" and detect_if_on_map(driver):
+                    send_notification("Level 5 detected, and landed on the map", driver)
                     break
 
-                logging.info("checking if we completed or died ")
-                current_level = detect_level()
+                send_notification("checking if we completed or died ", driver)
+                current_level = detect_level(driver)
                 if current_level == level:
-                    logging.info(f"{current_level}, {level}, you died 💀")
+                    send_notification(f"{current_level}, {level}, you died 💀", driver)
                     pyautogui.press("space")
                 else:
                     break
                 # END LEVEL SCAN METHOD -------------------------------------------
 
         # If we're on the map, we just finished a door, so go to next door
-        if detect_if_on_map():
-            logging.info("Going to next door")
+        if detect_if_on_map(driver):
+            send_notification("Going to next door", driver)
             door_names = list(levels.keys())
             selected_door = door_names[door_names.index(door) + 1]
             selected_level = "1"
             selected_level_index = 0
         else:
-            logging.info("Unsure if ready for next door, scanning")
-            selected_door, _ = detect_door()
-            selected_level = detect_level()
+            send_notification("Unsure if ready for next door, scanning", driver)
+            selected_door, _ = detect_door(driver)
+            selected_level = detect_level(driver)
 
 
 if __name__ == "__main__":
-    main()
+    from utils import connect_to_webdriver
+    # Create or reuse a Chromium webdriver
+    driver = connect_to_webdriver()
+    main(driver)

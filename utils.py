@@ -8,10 +8,53 @@ import logging
 import pyscreeze
 from colorist import ColorRGB
 import subprocess
+import json
 from selenium.webdriver import Chrome, ChromeOptions
 
 SESSION_FILE = "session.pickle"
 
+def send_notification(message, driver):
+    logging.info(message)
+
+    try:
+        driver.execute_script("""
+        (function () {
+            const parent = document.body;  
+
+            if (!parent) return;
+
+            // 2) Create the element
+            const el = document.createElement('div');         
+            el.className = 'ldbot-notification';                  
+
+            // 3) Content
+            el.textContent = 'MESSAGE_HERE';
+
+            // 4) STYLES (edit this block)
+            Object.assign(el.style, {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                color: '#fff',
+                padding: '1em 2em',
+                position: 'fixed',
+                top: '1em',
+                right: '1em',
+                zIndex: '99999',
+                fontFamily: 'monospace',
+                fontSize: '1.25rem'
+            });
+
+            // 5) Insert into DOM
+            parent.appendChild(el); 
+
+            setTimeout(function(){
+                if (el) el.remove();
+            }, 2000)
+        })();
+        """.replace( # Insert our message into the script, and make it json safe/escaped
+            "MESSAGE_HERE", json.dumps(message))
+        )
+    except Exception:
+        logging.info(f"Failed to send notification: {message}")
 
 def connect_to_webdriver():
     logging.info("Checking for existing browser session...")
@@ -35,11 +78,11 @@ def connect_to_webdriver():
 
     # Test the connection
     driver.current_url
-    logging.info("Successfully attached to browser!")
+    send_notification("Successfully attached to browser!", driver)
     return driver
 
 
-def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
+def finder(driver, folder, confidence=0.5, grayscale=False, min_search_time=3):
     level_screenshots = [folder + file for file in os.listdir(folder)]
 
     # Sort file list alphanumerically then REVERSE!
@@ -48,11 +91,11 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
     # when on level "3" and so on.
     level_screenshots.sort()
     level_screenshots.reverse()
-    logging.info(f"screenshot order: {level_screenshots}")
+    send_notification(f"screenshot order: {level_screenshots}", driver)
 
     # Take screenshot of entire screen, to see what the bot sees
     pyautogui.screenshot().save("./debugging_screenshots/fullscreen.png")
-    logging.info("Debugging fullscreen screenshot taken!")
+    send_notification("Debugging fullscreen screenshot taken!", driver)
 
     for screenshot in level_screenshots:
         try:
@@ -66,7 +109,7 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
                 # Extract coordinates from location tuple
                 left, top, width, height = location
 
-                logging.info(f"debug position {left}, {top}, {width}, {height}")
+                send_notification(f"debug position {left}, {top}, {width}, {height}", driver)
 
                 # Take screenshot of the matched region
                 match_screenshot = pyautogui.screenshot(
@@ -81,8 +124,8 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
                 )
                 match_screenshot.save(match_filename)
 
-                logging.info(f"Screenshot found at location {location}")
-                logging.info(f"Match screenshot saved as {match_filename}")
+                send_notification(f"Screenshot found at location {location}", driver)
+                send_notification(f"Match screenshot saved as {match_filename}", driver)
 
                 return screenshot.split("/")[-1].split(".")[0]
         # If the image we're looking for can't be found, or,
@@ -93,10 +136,10 @@ def finder(folder, confidence=0.5, grayscale=False, min_search_time=3):
     return None
 
 
-def play_level(steps):
+def play_level(driver, steps):
     # Loop over each item in this level
     for step in steps:
-        logging.info(f"step {step}")
+        send_notification(f"step {step}", driver)
 
         # If it's an integer or float, sleep that amount of time
         if isinstance(step, int) or isinstance(step, float):
@@ -115,14 +158,15 @@ def play_level(steps):
                 pyautogui.keyUp(step[1])
 
 
-def detect_level():
+def detect_level(driver):
     selected_level = finder(
+        driver,
         "./level_screenshots/", confidence=0.9, grayscale=True, min_search_time=2
     )
     # The screenshots are numbered by the actual level number, but our loop
     # starts at zero instead of one, so we need to -1 the number from the screenshot.
     # selected_level = str(int(selected_level) - 1)
-    logging.info(f"Found level? {selected_level}")
+    send_notification(f"Found level? {selected_level}", driver)
 
     if selected_level is None:
         selected_level = "1"
@@ -132,11 +176,11 @@ def detect_level():
 
 
 
-def detect_if_on_map():
+def detect_if_on_map(driver):
     """
     Returns true if the map is open, returns false if on any other screen
     """
-    logging.info("Looking for pause button...")
+    send_notification("Looking for pause button...", driver)
     try:
         pause_location = pyautogui.locateOnScreen(
             "general_screenshots/pause.png",
@@ -147,7 +191,7 @@ def detect_if_on_map():
 
         # If pause button is visible, we're in a level, NOT on the map
         if pause_location:
-            logging.info("Pause button found! You are NOT on the map")
+            send_notification("Pause button found! You are NOT on the map", driver)
             return False
         
     except (pyautogui.ImageNotFoundException, pyscreeze.ImageNotFoundException):
@@ -155,7 +199,7 @@ def detect_if_on_map():
         # return "True" (not on the map)
         pass
     
-    logging.info("pause button not found, assuming you are on the map")
+    send_notification("pause button not found, assuming you are on the map", driver)
     return True
 
 def is_retina_display():
@@ -165,10 +209,10 @@ def is_retina_display():
     screen_size = pyautogui.size()
     return (screen_size != screenshot_size)
 
-def detect_door():
+def detect_door(driver):
     # If not on the map, go to the map
-    if not detect_if_on_map():
-        logging.info("pause button found, going to map.")
+    if not detect_if_on_map(driver):
+        send_notification("pause button found, going to map.", driver)
         pyautogui.moveTo(140, 175, duration=0.5)
         pyautogui.click()
         pyautogui.sleep(0.5)
@@ -181,7 +225,7 @@ def detect_door():
 
     s = pyautogui.screenshot()
     retina_display = is_retina_display()
-    logging.info(f"Retina display: {retina_display}")
+    send_notification(f"Retina display: {retina_display}", driver)
 
     # yellow Color of the 'current' door, coded by RGBA
     color = (252, 247, 125)
@@ -191,7 +235,7 @@ def detect_door():
     # because it changes the color
     pyautogui.moveTo(100, 100, duration=0.5)
 
-    logging.info("Scanning door colors")
+    send_notification("Scanning door colors", driver)
     for door in door_positions.keys():
         x, y = door_positions[door]
 
@@ -200,15 +244,15 @@ def detect_door():
             y = y * 2
 
         r, g, b, a = s.getpixel((x, y))
-        logging.info(f"{ColorRGB(r,g,b)}{door} color is {r},{g},{b},{a}{ColorRGB(r,g,b).OFF}")
+        send_notification(f"{ColorRGB(r,g,b)}{door} color is {r},{g},{b},{a}{ColorRGB(r,g,b).OFF}", driver)
 
         if (r,g,b) == color:
-            logging.info(f"Found door! {door}")
+            send_notification(f"Found door! {door}", driver)
             selected_door = door
             break
 
     selected_door_index = list(levels.keys()).index(selected_door)
-    logging.info(f"Selected door index {selected_door_index}")
+    send_notification(f"Selected door index {selected_door_index}", driver)
 
     return selected_door, selected_door_index
 

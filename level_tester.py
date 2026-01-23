@@ -1,14 +1,14 @@
 import pyautogui
 import time
 from level_timings import levels
-import logging
 import rumps
+from utils import send_notification
 
-def level_tester(doc_mode=False):
+def level_tester(driver, dock_mode=False):
     # Manually select a level to use
     default_door = "pits"
     default_level = "1"
-    if not doc_mode: 
+    if not dock_mode: 
         selected_door = input(f"Which door are you playing? ({default_door})") or default_door
         selected_level = input(f"Which level are you playing? (default: {default_level})") or default_level
     else: 
@@ -19,7 +19,7 @@ def level_tester(doc_mode=False):
     # timings = levels[door][level]
     loading_delay = 5
 
-    logging.info(f"Move your focus to the window, you have {loading_delay} seconds!")
+    send_notification(f"Move your focus to the window, you have {loading_delay} seconds!", driver)
     time.sleep(loading_delay)
 
     # reset the keyss incase one is sstill being pressed
@@ -30,7 +30,7 @@ def level_tester(doc_mode=False):
 
     # loop over doors
     for door in list(levels)[selected_door_index:]:
-        logging.info(f"\n\ndoor {door}")
+        send_notification(f"\n\ndoor {door}", driver)
         time.sleep(loading_delay)
         pyautogui.press("space")
         selected_level_index = list(levels[door].keys()).index(selected_level)
@@ -41,12 +41,12 @@ def level_tester(doc_mode=False):
             pyautogui.press("right")
             pyautogui.press("left")
 
-            logging.info(f"\nlevel {level}")
+            send_notification(f"\nlevel {level}", driver)
             steps = levels[door][level]
 
             # Loop over each item in this level
             for step in steps:
-                logging.info(f"step {step}")
+                send_notification(f"step {step}", driver)
 
                 # If it's an integer or float, sleep that amount of time
                 if isinstance(step, int) or isinstance(step, float):
@@ -63,3 +63,7 @@ def level_tester(doc_mode=False):
                         pyautogui.keyDown(step[1])
                     elif step[0] == "keyUp":
                         pyautogui.keyUp(step[1])
+
+if __name__ == "__main__":
+    from utils import connect_to_webdriver
+    level_tester(connect_to_webdriver(), dock_mode=False)
