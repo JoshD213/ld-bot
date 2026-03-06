@@ -68,8 +68,8 @@ def connect_to_webdriver():
         logging.warning("Creating new browser session...")
 
         # Launch the browser
-        subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
-
+    #    subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+        subprocess.Popen("bunx -p chromedriver chromedriver --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
     logging.info("WebDriver should be running now, attempting attachment...")
 
     options = ChromeOptions()
