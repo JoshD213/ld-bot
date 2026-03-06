@@ -16,6 +16,7 @@
 - ~~WIP move from detecting door images to finding door color see utils.py~~
 - ~~print out screenshot of entire screen to check for level detection errors~~
 - ~~scanning for levels before the we click on the door~~
+- make package
 
 ## Problems:
 
