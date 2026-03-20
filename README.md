@@ -12,11 +12,12 @@
 - ~~level detection not working need to try lowering the confidence utils.detect_level, try alternate image detection librarys https://www.perplexity.ai/search/what-better-more-modern-altare-TdlVoNGZRFyJ6B8bi.J3jQ#2~~
 - ~~install add blocker in chromium to avoid end of level adds.~~
 - ~~failing to attach to existing browser~~
-- create dock app
 - ~~WIP move from detecting door images to finding door color see utils.py~~
 - ~~print out screenshot of entire screen to check for level detection errors~~
 - ~~scanning for levels before the we click on the door~~
-- make package
+~~instead of using pyqt5 to make overlays, which navigates away from fullscreen apps, we need to use css/js inside of our chromium browser to display message overlays inside the browser~~
+- make a python package
+- create dock app
 
 ## Problems:
 
@@ -25,6 +26,6 @@
 1. ~~Even after falling back using our "assuming already on map" logic, it fails to move the mouse off of the door (which messes up the color scanner) and fails to detect the second door as the active one.~~
 1. ~~Our loop is moving on to the spikes door but our door detector still thinks we're on pits, so it chooses pits but plays the timings for spikes.~~\
 ~~ Trying to figure out why door detection and level detection are suddenly not working. Door color scanner seems to be finding weird colors, looks like maybe the x/y coordinates of our doors is off?~~
+1. All click positions are hard coded (door locations and 1 player button, etc.) and specific to the macbook resolution and scale. We need to adapt our positioning based on the current machines resolution/scale OR just add image-finding for the 1 player button.
 
 ## CURRENT TASK:
-instead of using pyqt5 to make overlays, which navigates away from fullscreen apps, we need to use css/js inside of our chromium browser to display message overlays inside the browser

@@ -10,6 +10,7 @@ from colorist import ColorRGB
 import subprocess
 import json
 from selenium.webdriver import Chrome, ChromeOptions
+import sys
 
 SESSION_FILE = "session.pickle"
 
@@ -61,6 +62,8 @@ def connect_to_webdriver():
     # Check if Chrome and WebDriver service are running
     webdriver_running = is_webdriver_service_running()
 
+    os.makedirs("ChromeProfile", exist_ok=True)
+
     if not webdriver_running:
         logging.warning(
             f"Browser prerequisites not met - WebDriver: {webdriver_running}"
@@ -68,8 +71,12 @@ def connect_to_webdriver():
         logging.warning("Creating new browser session...")
 
         # Launch the browser
-    #    subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
-        subprocess.Popen("bunx -p chromedriver chromedriver --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+        if sys.platform == "win32":
+            subprocess.Popen("C:\chromium\chrome.exe --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+
+        elif sys.platform == "darwin":
+            subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+    
     logging.info("WebDriver should be running now, attempting attachment...")
 
     options = ChromeOptions()
@@ -94,6 +101,7 @@ def finder(driver, folder, confidence=0.5, grayscale=False, min_search_time=3):
     send_notification(f"screenshot order: {level_screenshots}", driver)
 
     # Take screenshot of entire screen, to see what the bot sees
+    os.makedirs("debugging_screenshots", exist_ok=True)
     pyautogui.screenshot().save("./debugging_screenshots/fullscreen.png")
     send_notification("Debugging fullscreen screenshot taken!", driver)
 
@@ -243,8 +251,12 @@ def detect_door(driver):
             x = x * 2
             y = y * 2
 
-        r, g, b, a = s.getpixel((x, y))
-        send_notification(f"{ColorRGB(r,g,b)}{door} color is {r},{g},{b},{a}{ColorRGB(r,g,b).OFF}", driver)
+        if sys.platform == "win32":
+            r, g, b = s.getpixel((x, y))
+        elif sys.platform == "darwin":
+            r, g, b, a = s.getpixel((x, y))
+        
+        send_notification(f"{ColorRGB(r,g,b)}{door} color is {r},{g},{b} {ColorRGB(r,g,b).OFF}", driver)
 
         if (r,g,b) == color:
             send_notification(f"Found door! {door}", driver)

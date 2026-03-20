@@ -16,10 +16,11 @@ from utils import (
 import logging
 
 logging.basicConfig(level=logging.INFO)
+loading_delay = 4
 
 def main(driver):
     # delete any debugging screenshots
-    subprocess.Popen("rm ./debugging_screenshots/*", shell=True)
+    subprocess.Popen("rm ./debugging_screenshots/*.png", shell=True)
     
     # Navigate to a website
     driver.get("https://poki.com/en/g/level-devil")
@@ -28,17 +29,19 @@ def main(driver):
     # keep the testing browser open
     # time.sleep(999999)
 
+    send_notification("Clicking fullscreen", driver)
     fs_button = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
     )
     fs_button.click()
 
+    send_notification("Clicking 1 Player", driver)
+    time.sleep(10)
     pyautogui.moveTo(578, 668, duration=0.5)
-    pyautogui.sleep(10)
     pyautogui.click()
+    send_notification("Should be in game now", driver)
 
     selected_door, selected_door_index = detect_door(driver)
-    loading_delay = 4
 
     # loop over doors
     for door in list(levels)[selected_door_index:]:
