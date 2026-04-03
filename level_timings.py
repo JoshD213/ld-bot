@@ -536,3 +536,13 @@ door_positions = {
     "wraparound": (1476, 721),
     "final": (1411, 537),
 }
+
+# Convert x/y positions that were specific to the mac laptop, to generic normalized x/y positions
+
+def normalize_point(x, y, width=1680, height=1050):
+    return x / width, y / height
+
+
+door_positions = {
+    k: normalize_point( v[0], v[1] ) for k, v in door_positions.items()
+}

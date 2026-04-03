@@ -72,7 +72,7 @@ def connect_to_webdriver():
 
         # Launch the browser
         if sys.platform == "win32":
-            subprocess.Popen("C:\chromium\chrome.exe --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+            subprocess.Popen("C:\\chromium\\chrome.exe --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
 
         elif sys.platform == "darwin":
             subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
@@ -210,12 +210,14 @@ def detect_if_on_map(driver):
     send_notification("pause button not found, assuming you are on the map", driver)
     return True
 
+
 def is_retina_display():
     """Returns true if the user's display is a retina display""" 
     s = pyautogui.screenshot()
     screenshot_size = s.size
     screen_size = pyautogui.size()
     return (screen_size != screenshot_size)
+
 
 def detect_door(driver):
     # If not on the map, go to the map
@@ -233,7 +235,9 @@ def detect_door(driver):
 
     s = pyautogui.screenshot()
     retina_display = is_retina_display()
-    send_notification(f"Retina display: {retina_display}", driver)
+    resolution = pyautogui.size()
+    # resolution_x, resolution_y = 
+    send_notification(f"Res: {resolution}, Retina: {retina_display}", driver)
 
     # yellow Color of the 'current' door, coded by RGBA
     color = (252, 247, 125)
@@ -246,6 +250,7 @@ def detect_door(driver):
     send_notification("Scanning door colors", driver)
     for door in door_positions.keys():
         x, y = door_positions[door]
+        x, y = denormalize_point(x, y, resolution_x, resolution_y)
 
         if retina_display:
             x = x * 2
@@ -289,3 +294,7 @@ def is_webdriver_service_running(port=9000):
     else:
         logging.info(f"No WebDriver service found on port {port}")
         return False
+
+
+def denormalize_point(nx, ny, target_width, target_height):
+    return nx * target_width, ny * target_height

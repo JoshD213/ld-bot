@@ -27,5 +27,6 @@
 1. ~~Our loop is moving on to the spikes door but our door detector still thinks we're on pits, so it chooses pits but plays the timings for spikes.~~\
 ~~ Trying to figure out why door detection and level detection are suddenly not working. Door color scanner seems to be finding weird colors, looks like maybe the x/y coordinates of our doors is off?~~
 1. All click positions are hard coded (door locations and 1 player button, etc.) and specific to the macbook resolution and scale. We need to adapt our positioning based on the current machines resolution/scale OR just add image-finding for the 1 player button.
+2. INFO:root:WebDriver should be running now, attempting attachment...
 
 ## CURRENT TASK:
