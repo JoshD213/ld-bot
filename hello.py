@@ -4,7 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import subprocess
-from level_timings import levels
+from level_timings import levels, normalize_point
 from utils import (
     click_door,
     play_level,
@@ -37,7 +37,8 @@ def main(driver):
 
     send_notification("Clicking 1 Player", driver)
     time.sleep(10)
-    pyautogui.moveTo(578, 668, duration=0.5)
+    x,y = normalize_point(578, 668)
+    pyautogui.moveTo(x, y, duration=0.5)
     pyautogui.click()
     send_notification("Should be in game now", driver)
 

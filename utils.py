@@ -236,7 +236,7 @@ def detect_door(driver):
     s = pyautogui.screenshot()
     retina_display = is_retina_display()
     resolution = pyautogui.size()
-    # resolution_x, resolution_y = 
+    resolution_x, resolution_y = resolution
     send_notification(f"Res: {resolution}, Retina: {retina_display}", driver)
 
     # yellow Color of the 'current' door, coded by RGBA

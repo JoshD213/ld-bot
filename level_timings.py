@@ -1,4 +1,6 @@
 # TODO: move this to a confige file to change while bot is running
+import pyautogui
+
 levels = {
     "pits": {
         "1": [("keyDown", "right"), 2.6, "up"],
@@ -539,7 +541,10 @@ door_positions = {
 
 # Convert x/y positions that were specific to the mac laptop, to generic normalized x/y positions
 
-def normalize_point(x, y, width=1680, height=1050):
+def normalize_point(x, y, width=None, height=None):
+    print(x, y, width, height)
+    if not width or not height: 
+        width, height = pyautogui.size() 
     return x / width, y / height
 
 

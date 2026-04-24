@@ -30,3 +30,4 @@
 2. INFO:root:WebDriver should be running now, attempting attachment...
 
 ## CURRENT TASK:
+fix clicking on 1 player buitton. currently moves to corner and triggers fail safe
