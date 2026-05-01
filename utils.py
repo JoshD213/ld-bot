@@ -72,7 +72,7 @@ def connect_to_webdriver():
 
         # Launch the browser
         if sys.platform == "win32":
-            subprocess.Popen("C:\\chromium\\chrome.exe --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+            subprocess.Popen("c:\\chromium\\chrome.exe --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
 
         elif sys.platform == "darwin":
             subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)

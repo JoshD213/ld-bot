@@ -37,7 +37,8 @@ def main(driver):
 
     send_notification("Clicking 1 Player", driver)
     time.sleep(10)
-    x,y = normalize_point(578, 668)
+    x, y = normalize_point(578, 668)
+    send_notification(f"Normalized x/y:{x} {y}", driver)
     pyautogui.moveTo(x, y, duration=0.5)
     pyautogui.click()
     send_notification("Should be in game now", driver)

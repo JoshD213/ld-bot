@@ -539,13 +539,27 @@ door_positions = {
     "final": (1411, 537),
 }
 
-# Convert x/y positions that were specific to the mac laptop, to generic normalized x/y positions
+# Convert x/y positions that were specific to the mac laptop,
+# to positions specific to current computer screen resolution
 
 def normalize_point(x, y, width=None, height=None):
     print(x, y, width, height)
+    # Example 578, 668 on a 1680x1050 display
+    # should convert to ??? on a 2560x1440 display
+    original_screen_width, original_screen_height = 1680, 1050
+    
+    # Converts macbook-specific positions to percentage-based positions
+    percent_x, percent_y = x / original_screen_width, y / original_screen_height
+
+    # Get current-screen resolution
     if not width or not height: 
         width, height = pyautogui.size() 
-    return x / width, y / height
+        
+    # Convert percentage-based positions to x/y of current screen resolution
+    x, y = int(width * percent_x), int(height * percent_y)
+
+    return x, y
+
 
 
 door_positions = {
