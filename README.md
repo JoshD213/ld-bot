@@ -30,4 +30,4 @@
 2. INFO:root:WebDriver should be running now, attempting attachment...
 
 ## CURRENT TASK:
-fix clicking on 1 player buitton. clicks are not working
+fix clicking on 1 player buitton. clicks are not working. Proven: clicks work in notepad, clicks dont work in any python libraries. Theory: try older chrome+chromedriver combo, the same version roughly that worked on the mac. We installed the chromium for the older version but need the older chrome to go with it.

@@ -72,7 +72,8 @@ def connect_to_webdriver():
 
         # Launch the browser
         if sys.platform == "win32":
-            subprocess.Popen("c:\\chromium\\chrome.exe --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+            # Install Chocolatey, then run choco install chromium --version=141.0.7390.108
+            subprocess.Popen("\"c:\\Program Files\\Chromium\\Application\\chrome.exe\" --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
 
         elif sys.platform == "darwin":
             subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
@@ -81,6 +82,7 @@ def connect_to_webdriver():
 
     options = ChromeOptions()
     options.add_experimental_option("debuggerAddress", "localhost:9000")
+    options.add_argument("--disable-blink-features=AutomationControlled")
     driver = Chrome(options=options)
 
     # Test the connection

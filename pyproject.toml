@@ -9,6 +9,10 @@ dependencies = [
     "opencv-python>=4.10.0.84",
     "pillow>=11.0.0",
     "pyautogui>=0.9.54",
+    "pydirectinput>=1.0.4",
+    "pynput>=1.8.1",
+    "pywin32>=311",
+    "pywinauto>=0.6.9",
     "rumps>=0.4.0 ; sys_platform == \"darwin\"",
     "selenium>=4.28.1",
 ]
