@@ -35,6 +35,14 @@ def main(driver):
     )
     fs_button.click()
 
+    # Click on the firefox window once, to make it active/focused
+    # Position doesn't matter, click will only focus the window not actually
+    # click within it.
+    send_notification("Focusing firefox window", driver)
+    time.sleep(2)
+    pyautogui.moveTo(150, 150, duration=0.5)
+    pyautogui.click()
+
     send_notification("Clicking 1 Player", driver)
     time.sleep(10)
     x, y = normalize_point(578, 668)

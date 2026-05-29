@@ -9,7 +9,8 @@ import pyscreeze
 from colorist import ColorRGB
 import subprocess
 import json
-from selenium.webdriver import Chrome, ChromeOptions
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 import sys
 
 SESSION_FILE = "session.pickle"
@@ -57,38 +58,56 @@ def send_notification(message, driver):
     except Exception:
         logging.info(f"Failed to send notification: {message}")
 
+
 def connect_to_webdriver():
-    logging.info("Checking for existing browser session...")
-    # Check if Chrome and WebDriver service are running
-    webdriver_running = is_webdriver_service_running()
+    """
+    Launches fresh Firefox selenium driver, reusing a common profile folder to
+    save the game state.
+    """
+    firefox_options = FirefoxOptions()
+    # TODO: figure out profiles directory settings
+    driver = webdriver.Firefox(options=firefox_options)
 
-    os.makedirs("ChromeProfile", exist_ok=True)
-
-    if not webdriver_running:
-        logging.warning(
-            f"Browser prerequisites not met - WebDriver: {webdriver_running}"
-        )
-        logging.warning("Creating new browser session...")
-
-        # Launch the browser
-        if sys.platform == "win32":
-            # Install Chocolatey, then run choco install chromium --version=141.0.7390.108
-            subprocess.Popen("\"c:\\Program Files\\Chromium\\Application\\chrome.exe\" --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
-
-        elif sys.platform == "darwin":
-            subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
-    
-    logging.info("WebDriver should be running now, attempting attachment...")
-
-    options = ChromeOptions()
-    options.add_experimental_option("debuggerAddress", "localhost:9000")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    driver = Chrome(options=options)
-
-    # Test the connection
+    # Test connection
     driver.current_url
-    send_notification("Successfully attached to browser!", driver)
+    send_notification("Successfully launched firefox!", driver)
+
     return driver
+
+# OUTDATED: Moved to firefox to fix clicks not working inside the HTML canvas of the game.
+# from selenium.webdriver import Chrome, ChromeOptions
+# def connect_to_webdriver():
+#     logging.info("Checking for existing browser session...")
+#     # Check if Chrome and WebDriver service are running
+#     webdriver_running = is_webdriver_service_running()
+
+#     os.makedirs("ChromeProfile", exist_ok=True)
+
+#     if not webdriver_running:
+#         logging.warning(
+#             f"Browser prerequisites not met - WebDriver: {webdriver_running}"
+#         )
+#         logging.warning("Creating new browser session...")
+
+#         # Launch the browser
+#         if sys.platform == "win32":
+#             # Install Chocolatey, then run choco install chromium --version=141.0.7390.108
+#             subprocess.Popen("\"c:\\Program Files\\Chromium\\Application\\chrome.exe\" --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+
+#         elif sys.platform == "darwin":
+#             subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
+    
+#     logging.info("WebDriver should be running now, attempting attachment...")
+
+#     options = ChromeOptions()
+#     options.add_experimental_option("debuggerAddress", "localhost:9000")
+#     options.add_argument("--disable-blink-features=AutomationControlled")
+#     driver = Chrome(options=options)
+
+#     # Test the connection
+#     driver.current_url
+#     send_notification("Successfully attached to browser!", driver)
+#     return driver
 
 
 def finder(driver, folder, confidence=0.5, grayscale=False, min_search_time=3):
