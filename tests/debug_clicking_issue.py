@@ -11,6 +11,9 @@ from level_timings import normalize_point
 # from pynput.mouse import Button, Controller
 
 driver = connect_to_webdriver()
+
+firefox_options.add_argument("-profile")
+firefox_options.add_argument("./FirefoxProfile")
 driver.get("https://poki.com/en/g/level-devil")
 fs_button = WebDriverWait(driver, 10).until(
     EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))

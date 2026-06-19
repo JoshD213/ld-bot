@@ -7,7 +7,6 @@ import socket
 import logging
 import pyscreeze
 from colorist import ColorRGB
-import subprocess
 import json
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -65,6 +64,9 @@ def connect_to_webdriver():
     save the game state.
     """
     firefox_options = FirefoxOptions()
+
+    firefox_options.add_argument("-profile")
+    firefox_options.add_argument("./FirefoxProfile")
     # TODO: figure out profiles directory settings
     driver = webdriver.Firefox(options=firefox_options)
 
