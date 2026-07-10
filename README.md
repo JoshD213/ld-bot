@@ -32,6 +32,8 @@
 1. ~~INFO:root:WebDriver should be running now, attempting attachment...~~ We no longer need reattachment, saving the game state with custom profile folder is enough.
 1. ~~fix clicking on 1 player buitton. clicks are not working. Proven: clicks work in notepad, clicks dont work in any python libraries. Theory: try older chrome+chromedriver combo, the same version roughly that worked on the mac. We installed the chromium for the older version but need the older chrome to go with it.~~
     1. ~~Confirmed issue: Chrome/chromium. Clicks work in Firefox (requires window to be active or, to do 2 clicks in a row) and other apps. Moving to selenium controlled firefox fixed the issue. See `tests\browser_clicking_test.py`~~
+~~Get firefox profile storage/persistence working in tests\browser_clicking_test.py~~
 
 ## CURRENT TASK:
-Get firefox profile storage/persistence working in tests\browser_clicking_test.py 
+
+full screen button sometimes doesnt click, browser window sometimes doesnt focus

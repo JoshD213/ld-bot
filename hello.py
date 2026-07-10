@@ -31,7 +31,7 @@ def main(driver):
 
     send_notification("Clicking fullscreen", driver)
     fs_button = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#fullscreen-button"))
+        EC.element_to_be_clickable((By.CSS_SELECTOR, "#fullscreen-button"))
     )
     fs_button.click()
 
@@ -39,9 +39,9 @@ def main(driver):
     # Position doesn't matter, click will only focus the window not actually
     # click within it.
     send_notification("Focusing firefox window", driver)
-    time.sleep(2)
+    time.sleep(3)
     pyautogui.moveTo(150, 150, duration=0.5)
-    pyautogui.click()
+    pyautogui.click(150, 150, clicks=2, interval=1)
 
     send_notification("Clicking 1 Player", driver)
     time.sleep(10)

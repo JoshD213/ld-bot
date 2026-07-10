@@ -163,3 +163,5 @@ cython_debug/
 
 # Our folder for storing the chrome cache
 .DS_Store
+
+FirefoxProfile/*

@@ -21,22 +21,18 @@ from level_timings import normalize_point
 # DOES NOT CLICK!
 
 # Firefox
+# profile_path = Path(__file__).parent / "FirefoxProfile"
+# profile_path = profile_path.resolve()
+# print(f"Profile path: {profile_path}")
+
+# if not profile_path.is_dir():
+#     raise FileNotFoundError(f"Firefox profile folder not found: {profile_path}")
+
 firefox_options = FirefoxOptions()
-
-# TODO: figure out profile folder configuration
-profile_path = str(Path("FirefoxProfile").resolve())
-print(f"Profile path: {profile_path}")
-profile = FirefoxProfile(profile_path)
-firefox_options.profile = profile
-# Status: Doesn't error, but no files showing up in folder and not saving game state
-
-# Didn't work:
 # firefox_options.add_argument("-profile")
-# firefox_options.add_argument("./FirefoxProfile")
-
+# firefox_options.add_argument(str(profile_path))
 
 driver = webdriver.Firefox(options=firefox_options)
-# CLICKS WORKED! Requires first click to do nothing / make the window active
 
 driver.get("https://poki.com/en/g/level-devil")
 fs_button = WebDriverWait(driver, 10).until(
@@ -47,11 +43,8 @@ fs_button.click()
 time.sleep(10)
 x, y = normalize_point(578, 668) # Working great for dynamic positioning
 pyautogui.moveTo(x, y, duration=0.5)
-pyautogui.click()
-time.sleep(1)
-pyautogui.click()
-time.sleep(1)
-pyautogui.click()
-time.sleep(1)
-pyautogui.click()
+
+pyautogui.click(x, y, clicks=2, interval=1)
+# CLICKS WORKED! Requires first click to do nothing / make the window active
+
 time.sleep(99999999)

@@ -11,6 +11,7 @@ import json
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 import sys
+from pathlib import Path
 
 SESSION_FILE = "session.pickle"
 
@@ -63,11 +64,18 @@ def connect_to_webdriver():
     Launches fresh Firefox selenium driver, reusing a common profile folder to
     save the game state.
     """
-    firefox_options = FirefoxOptions()
 
+    # Create a profile folder so our game state saves across runs
+    profile_path = Path(__file__).parent / "FirefoxProfile"
+    profile_path = profile_path.resolve()
+
+    # Create the profile folder if it doesn't exist yet
+    os.makedirs(profile_path, exist_ok=True)
+
+    firefox_options = FirefoxOptions()
     firefox_options.add_argument("-profile")
-    firefox_options.add_argument("./FirefoxProfile")
-    # TODO: figure out profiles directory settings
+    firefox_options.add_argument(str(profile_path))
+
     driver = webdriver.Firefox(options=firefox_options)
 
     # Test connection
