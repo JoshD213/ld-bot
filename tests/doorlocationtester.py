@@ -1,9 +1,27 @@
 import pyautogui
-from level_timings import door_positions
 import logging
 from colorist import ColorRGB
+import os
+import sys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+
+# Add parent directory to path so imports work
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from level_timings import door_positions
+from utils import send_notification, connect_to_webdriver
 
 logging.basicConfig(level=logging.INFO)
+
+# boot up browser (optional)
+driver = connect_to_webdriver()
+driver.get("https://poki.com/en/g/level-devil")
+send_notification("Clicking fullscreen", driver)
+fs_button = WebDriverWait(driver, 10).until(
+    EC.element_to_be_clickable((By.CSS_SELECTOR, "#fullscreen-button"))
+)
+fs_button.click()
 
 logging.info("move to browser")
 pyautogui.sleep(5)
@@ -28,8 +46,8 @@ for door, position in door_positions.items():
         x = x * 2
         y = y * 2
 
-    r, g, b, a = s.getpixel((x, y))
-    logging.info(f"{ColorRGB(r,g,b)}{door} {x, y}: color is this {r},{g},{b},{a}{ColorRGB(r,g,b).OFF}")
+    r, g, b = s.getpixel((x, y))
+    logging.info(f"{ColorRGB(r,g,b)}{door} {x, y}: color is this {r},{g},{b}{ColorRGB(r,g,b).OFF}")
 
 
 for position in door_positions.values():

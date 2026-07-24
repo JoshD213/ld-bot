@@ -266,9 +266,9 @@ def detect_door(driver):
 
     s = pyautogui.screenshot()
     retina_display = is_retina_display()
-    resolution = pyautogui.size()
-    resolution_x, resolution_y = resolution
-    send_notification(f"Res: {resolution}, Retina: {retina_display}", driver)
+    # resolution = pyautogui.size()
+    # resolution_x, resolution_y = resolution
+    # send_notification(f"Res: {resolution}, Retina: {retina_display}", driver)
 
     # yellow Color of the 'current' door, coded by RGBA
     color = (252, 247, 125)
@@ -281,7 +281,7 @@ def detect_door(driver):
     send_notification("Scanning door colors", driver)
     for door in door_positions.keys():
         x, y = door_positions[door]
-        x, y = denormalize_point(x, y, resolution_x, resolution_y)
+        # x, y = denormalize_point(x, y, resolution_x, resolution_y)
 
         if retina_display:
             x = x * 2
@@ -325,7 +325,3 @@ def is_webdriver_service_running(port=9000):
     else:
         logging.info(f"No WebDriver service found on port {port}")
         return False
-
-
-def denormalize_point(nx, ny, target_width, target_height):
-    return nx * target_width, ny * target_height

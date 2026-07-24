@@ -1,5 +1,8 @@
 # TODO: move this to a confige file to change while bot is running
 import pyautogui
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 levels = {
     "pits": {
@@ -520,34 +523,48 @@ levels = {
     },
 }
 
+# 354 564
+# 562 395
+# 632 533
+# 460 738
+# 591 877
+# 561 1061
+# 798 922
+# 1000 613
+# 1024 604
+# 1061 828
+# 1385 864
+# 1570 955
+# 1613 732
+# 1655 516
+# 1864 614
+
+# NOTE: Make sure you set original_screen_width and original_screen_height
+# below to whatever the screen resolution is on the screen you recorded
+# these X/Y coordinates on.
+original_screen_width, original_screen_height = 2560, 1440
 door_positions = {
-    "pits": (107, 485),
-    "spikes": (285, 440),
-    "push": (466, 452),
-    "coins": (615, 534),
-    "controls": (523, 679),
-    "platforms": (571, 840),
-    "springs": (757, 818),
-    "warps": (873, 688),
-    "scale": (836, 522),
-    "doors": (972, 450),
-    "saws": (1100, 563),
-    "flappy": (1154, 738),
-    "gravity": (1249, 857),
-    "movement": (1413, 874),
-    "wraparound": (1476, 721),
-    "final": (1411, 537),
+    "pits": (354, 564),
+    "spikes": (562, 395),
+    "push": (632, 533),
+    "coins": (460, 738),
+    "controls": (591, 877),
+    "platforms": (561, 1061),
+    "springs": (798, 922),
+    "warps": (1000, 613),
+    "scale": (1024, 604),
+    "doors": (1061, 828),
+    "saws": (1385, 864),
+    "flappy": (1570, 955),
+    "gravity": (1613, 732),
+    "movement": (1655, 516),
+    "wraparound": (1864, 614),
+    "final": (2180, 749),
 }
 
-# Convert x/y positions that were specific to the mac laptop,
-# to positions specific to current computer screen resolution
-
+# Convert x/y positions that were specific to one screen,
+# into positions specific to current computer screen resolution
 def normalize_point(x, y, width=None, height=None):
-    print(x, y, width, height)
-    # Example 578, 668 on a 1680x1050 display
-    # should convert to ??? on a 2560x1440 display
-    original_screen_width, original_screen_height = 1680, 1050
-    
     # Converts macbook-specific positions to percentage-based positions
     percent_x, percent_y = x / original_screen_width, y / original_screen_height
 
@@ -555,8 +572,11 @@ def normalize_point(x, y, width=None, height=None):
     if not width or not height: 
         width, height = pyautogui.size() 
         
+    print("width, height:", width, height)
+    print("Before x/y:", x, y)
     # Convert percentage-based positions to x/y of current screen resolution
     x, y = int(width * percent_x), int(height * percent_y)
+    print("After x/y:", x, y)
 
     return x, y
 
