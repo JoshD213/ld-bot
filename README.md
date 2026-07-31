@@ -39,3 +39,4 @@
 ## CURRENT TASK:
 
 full screen button sometimes doesnt click, browser window sometimes doesnt focus
+currently in tests/browser_clicking_test.py trying to get the window focus and door click to work consistently.

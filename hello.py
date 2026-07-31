@@ -1,19 +1,21 @@
-import pyautogui
-import time
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
+import logging
 import subprocess
+import time
+
+import pyautogui
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
 from level_timings import levels
 from utils import (
     click_door,
-    play_level,
     detect_door,
-    detect_level,
     detect_if_on_map,
-    send_notification
+    detect_level,
+    play_level,
+    send_notification,
 )
-import logging
 
 logging.basicConfig(level=logging.INFO)
 loading_delay = 4
@@ -40,8 +42,8 @@ def main(driver):
     # click within it.
     send_notification("Focusing firefox window", driver)
     time.sleep(3)
-    pyautogui.moveTo(150, 150, duration=0.5)
-    pyautogui.click(150, 150, clicks=2, interval=1)
+    pyautogui.moveTo(50, 50, duration=0.5)
+    pyautogui.click(50, 50, clicks=2, interval=1)
 
     # send_notification("Clicking 1 Player", driver)
     # time.sleep(10)

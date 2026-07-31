@@ -1,25 +1,28 @@
-import pyautogui
-import time
-import os
-from level_timings import levels
-from level_timings import door_positions
-import socket
-import logging
-import pyscreeze
-from colorist import ColorRGB
 import json
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
+import logging
+import os
+import socket
 import sys
+import time
 from pathlib import Path
 
+import pyautogui
+import pyscreeze
+from colorist import ColorRGB
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+
+from level_timings import door_positions, levels
+
 SESSION_FILE = "session.pickle"
+
 
 def send_notification(message, driver):
     logging.info(message)
 
     try:
-        driver.execute_script("""
+        driver.execute_script(
+            """
         (function () {
             const parent = document.body;  
 
@@ -52,8 +55,9 @@ def send_notification(message, driver):
                 if (el) el.remove();
             }, 2000)
         })();
-        """.replace( # Insert our message into the script, and make it json safe/escaped
-            "MESSAGE_HERE", json.dumps(message))
+        """.replace(  # Insert our message into the script, and make it json safe/escaped
+                "MESSAGE_HERE", json.dumps(message)
+            )
         )
     except Exception:
         logging.info(f"Failed to send notification: {message}")
@@ -84,6 +88,7 @@ def connect_to_webdriver():
 
     return driver
 
+
 # OUTDATED: Moved to firefox to fix clicks not working inside the HTML canvas of the game.
 # from selenium.webdriver import Chrome, ChromeOptions
 # def connect_to_webdriver():
@@ -106,7 +111,7 @@ def connect_to_webdriver():
 
 #         elif sys.platform == "darwin":
 #             subprocess.Popen("chromium --remote-debugging-port=9000 --user-data-dir=./ChromeProfile &", shell=True)
-    
+
 #     logging.info("WebDriver should be running now, attempting attachment...")
 
 #     options = ChromeOptions()
@@ -148,7 +153,9 @@ def finder(driver, folder, confidence=0.5, grayscale=False, min_search_time=3):
                 # Extract coordinates from location tuple
                 left, top, width, height = location
 
-                send_notification(f"debug position {left}, {top}, {width}, {height}", driver)
+                send_notification(
+                    f"debug position {left}, {top}, {width}, {height}", driver
+                )
 
                 # Take screenshot of the matched region
                 match_screenshot = pyautogui.screenshot(
@@ -169,7 +176,10 @@ def finder(driver, folder, confidence=0.5, grayscale=False, min_search_time=3):
                 return screenshot.split("/")[-1].split(".")[0]
         # If the image we're looking for can't be found, or,
         # if the debugging screenshot can't be saved, keep looping
-        except (pyautogui.ImageNotFoundException,pyscreeze.ImageNotFoundException) as err:
+        except (
+            pyautogui.ImageNotFoundException,
+            pyscreeze.ImageNotFoundException,
+        ) as err:
             logging.error(err)
             continue
     return None
@@ -200,7 +210,10 @@ def play_level(driver, steps):
 def detect_level(driver):
     selected_level = finder(
         driver,
-        "./level_screenshots/", confidence=0.9, grayscale=True, min_search_time=2
+        "./level_screenshots/",
+        confidence=0.9,
+        grayscale=True,
+        min_search_time=2,
     )
     # The screenshots are numbered by the actual level number, but our loop
     # starts at zero instead of one, so we need to -1 the number from the screenshot.
@@ -212,7 +225,6 @@ def detect_level(driver):
         logging.warning("couldnt find level falling back to 1")
 
     return selected_level
-
 
 
 def detect_if_on_map(driver):
@@ -232,22 +244,27 @@ def detect_if_on_map(driver):
         if pause_location:
             send_notification("Pause button found! You are NOT on the map", driver)
             return False
-        
+
     except (pyautogui.ImageNotFoundException, pyscreeze.ImageNotFoundException):
         # Errors due to not finding pause button are expected, continue and
         # return "True" (not on the map)
         pass
-    
+
     send_notification("pause button not found, assuming you are on the map", driver)
     return True
 
 
 def is_retina_display():
-    """Returns true if the user's display is a retina display""" 
+    """Returns true if the user's display is a retina display"""
     s = pyautogui.screenshot()
     screenshot_size = s.size
     screen_size = pyautogui.size()
-    return (screen_size != screenshot_size)
+    return screen_size != screenshot_size
+
+
+# Check if a number is close to another number (like rgb colors being close to exact)
+def is_within_range(num, target, range):
+    return abs(num - target) <= range
 
 
 def detect_door(driver):
@@ -271,7 +288,7 @@ def detect_door(driver):
     # send_notification(f"Res: {resolution}, Retina: {retina_display}", driver)
 
     # yellow Color of the 'current' door, coded by RGBA
-    color = (252, 247, 125)
+    active_door_color = (250, 247, 101)
     # Fallback door in case one isn't found
     selected_door = "pits"
     # Make sure mouse isnt hovering over a door
@@ -279,7 +296,7 @@ def detect_door(driver):
     pyautogui.moveTo(100, 100, duration=0.5)
 
     send_notification("Scanning door colors", driver)
-    for door in door_positions.keys():
+    for door in door_positions:
         x, y = door_positions[door]
         # x, y = denormalize_point(x, y, resolution_x, resolution_y)
 
@@ -291,10 +308,18 @@ def detect_door(driver):
             r, g, b = s.getpixel((x, y))
         elif sys.platform == "darwin":
             r, g, b, a = s.getpixel((x, y))
-        
-        send_notification(f"{ColorRGB(r,g,b)}{door} color is {r},{g},{b} {ColorRGB(r,g,b).OFF}", driver)
 
-        if (r,g,b) == color:
+        send_notification(
+            f"{ColorRGB(r, g, b)}{door} color is {r},{g},{b} {ColorRGB(r, g, b).OFF}",
+            driver,
+        )
+
+        if (r, g, b) == active_door_color or (
+            # If not an exact color match, check if RGB are all within 10 points of being a match
+            is_within_range(r, active_door_color[0], 10)
+            and is_within_range(g, active_door_color[1], 10)
+            and is_within_range(b, active_door_color[2], 10)
+        ):
             send_notification(f"Found door! {door}", driver)
             selected_door = door
             break
@@ -307,8 +332,9 @@ def detect_door(driver):
 
 def click_door(door_name):
     x, y = door_positions[door_name]
-    
-    pyautogui.click(x, y)
+
+    pyautogui.moveTo(x, y, duration=0.5)
+    pyautogui.click(x, y, clicks=2, interval=1)
 
 
 def is_webdriver_service_running(port=9000):
