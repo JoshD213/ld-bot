@@ -4,6 +4,7 @@ import time
 
 import pyautogui
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionBuilder
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,7 +12,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 # Add parent directory to path so imports work
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Run these AFTER the path fix
-from level_timings import normalize_point
 
 pyautogui.moveTo(5, 5)
 
@@ -32,7 +32,7 @@ pyautogui.moveTo(5, 5)
 # firefox_options.add_argument("-profile")
 # firefox_options.add_argument(str(profile_path))
 
-driver = webdriver.Firefox() #options=firefox_options)
+driver = webdriver.Firefox()  # options=firefox_options)
 
 driver.get("https://poki.com/en/g/level-devil")
 fs_button = WebDriverWait(driver, 10).until(
@@ -40,18 +40,29 @@ fs_button = WebDriverWait(driver, 10).until(
 )
 fs_button.click()
 
-time.sleep(10)
+time.sleep(4)
 
-# click to just focus the window
-pyautogui.moveTo(50, 50, duration=0.5)
-pyautogui.click(50, 50, clicks=2, interval=1)
+# NEW SELENIUM OFFSET METHOD
+# https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#offset-from-viewport
 
-time.sleep(2)
+# BUG: The offset from element uses center positioning, so we wanted to try offset from viewport instead
+# in both cases, we ended up being to the upper left of the door. Something is off in the math
+game = driver.find_element(By.CSS_SELECTOR, "#game-element")
+action = ActionBuilder(driver)
+action.pointer_action.move_to_location(354, 564)
+action.perform()
 
-# this is door position 1, for the pits door
-x, y = normalize_point(354, 564) # Working great for dynamic positioning
-pyautogui.moveTo(x, y, duration=0.5)
-pyautogui.click(x, y, clicks=2, interval=1)
-# CLICKS WORKED! Requires first click to do nothing / make the window active
+# OLD PYAUTOGUI METHOD
+# # click to just focus the window
+# pyautogui.moveTo(50, 50, duration=0.5)
+# pyautogui.click(50, 50, clicks=2, interval=1)
 
-time.sleep(99999999)
+# time.sleep(2)
+
+# # this is door position 1, for the pits door
+# x, y = normalize_point(354, 564) # Working great for dynamic positioning
+# pyautogui.moveTo(x, y, duration=0.5)
+# pyautogui.click(x, y, clicks=2, interval=1)
+# # CLICKS WORKED! Requires first click to do nothing / make the window active
+
+# time.sleep(99999999)
