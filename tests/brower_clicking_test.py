@@ -16,12 +16,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 pyautogui.moveTo(5, 5)
 
-# Chrome
+# Chrome: DID NOT WORK
 # chrome_options = ChromeOptions()
 # driver = webdriver.Chrome(options=chrome_options)
-# DOES NOT CLICK!
 
-# Firefox
+# Firefox: DID NOT WORK
 # profile_path = Path(__file__).parent / "FirefoxProfile"
 # profile_path = profile_path.resolve()
 # print(f"Profile path: {profile_path}")
@@ -43,22 +42,21 @@ fs_button.click()
 
 time.sleep(4)
 
-# NEW SELENIUM OFFSET METHOD
+# NEW SELENIUM OFFSET METHOD: WORKING!
 # https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#offset-from-viewport
-
-# BUG: The offset from element uses center positioning, so we wanted to try offset from viewport instead
-# in both cases, we ended up being to the upper left of the door. Something is off in the math
+# Moving and clicking, without using the duration on the ActionBuilder, and without using pauses between
+# actions, did not make the hover effect appear on the doors in the game, and failed to recognize
+# clicks on the doors. 
 game = driver.find_element(By.CSS_SELECTOR, "#game-element")
 action = ActionBuilder(driver, duration=320)
 action.pointer_action.move_to_location(354, 564)
 action.pointer_action.pause(0.10)
-# action.pointer_action.click()
 action.pointer_action.pointer_down(MouseButton.LEFT)
 action.pointer_action.pause(0.08)
 action.pointer_action.pointer_up(MouseButton.LEFT)
 action.perform()
 
-# OLD PYAUTOGUI METHOD
+# OLD PYAUTOGUI METHOD: DID NOT WORK
 # # click to just focus the window
 # pyautogui.moveTo(50, 50, duration=0.5)
 # pyautogui.click(50, 50, clicks=2, interval=1)

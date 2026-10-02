@@ -1,6 +1,7 @@
 # TODO: move this to a confige file to change while bot is running
-import pyautogui
 import logging
+
+import pyautogui
 
 logging.basicConfig(level=logging.INFO)
 

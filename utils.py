@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import random
 import socket
 import sys
 import time
@@ -10,6 +11,9 @@ import pyautogui
 import pyscreeze
 from colorist import ColorRGB
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionBuilder
+from selenium.webdriver.common.actions.mouse_button import MouseButton
+from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 from level_timings import door_positions, levels
@@ -196,7 +200,8 @@ def play_level(driver, steps):
 
         # If it's a string, press that key
         elif isinstance(step, str):
-            pyautogui.press(step)
+            # pyautogui.press(step)
+            pyautogui.keyDown(step)
 
         # If it's a tuple (), then take the first value as the action (like keyDown)
         # and the second value as the key
@@ -267,16 +272,34 @@ def is_within_range(num, target, range):
     return abs(num - target) <= range
 
 
+def special_click(driver, x_offset, y_offset):
+    """
+    x_offset = Horizontal pixel offset from the top left of the #game-element where you want to click 
+    y_offset = Vertical pixel offset from the top left of the #game-element where you want to click 
+    """
+
+    driver.find_element(By.CSS_SELECTOR, "#game-element")
+    action = ActionBuilder(driver, duration=random.randint(200, 800))
+    action.pointer_action.move_to_location(x_offset, y_offset)
+    action.pointer_action.pause(random.randint(0, 100) / 100)
+    action.pointer_action.pointer_down(MouseButton.LEFT)
+    action.pointer_action.pause(random.randint(0, 100) / 100)
+    action.pointer_action.pointer_up(MouseButton.LEFT)
+    action.perform()
+
+
 def detect_door(driver):
     # If not on the map, go to the map
     if not detect_if_on_map(driver):
         send_notification("pause button found, going to map.", driver)
-        pyautogui.moveTo(140, 175, duration=0.5)
-        pyautogui.click()
+        # pyautogui.moveTo(140, 175, duration=0.5)
+        # pyautogui.click()
+        special_click(driver, 140, 175)
         pyautogui.sleep(0.5)
-        pyautogui.moveTo(750, 500, duration=0.5)
-        pyautogui.sleep(2)
-        pyautogui.click()
+        # pyautogui.moveTo(750, 500, duration=0.5)
+        # pyautogui.sleep(2)
+        # pyautogui.click()
+        special_click(driver, 750, 500)
 
     # Let the map load
     pyautogui.sleep(2)
@@ -330,11 +353,12 @@ def detect_door(driver):
     return selected_door, selected_door_index
 
 
-def click_door(door_name):
+def click_door(driver, door_name):
     x, y = door_positions[door_name]
 
-    pyautogui.moveTo(x, y, duration=0.5)
-    pyautogui.click(x, y, clicks=2, interval=1)
+    # pyautogui.moveTo(x, y, duration=0.5)
+    # pyautogui.click(x, y, clicks=2, interval=1)
+    special_click(driver, x, y)
 
 
 def is_webdriver_service_running(port=9000):

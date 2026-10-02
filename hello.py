@@ -15,6 +15,7 @@ from utils import (
     detect_level,
     play_level,
     send_notification,
+    special_click,
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -42,8 +43,10 @@ def main(driver):
     # click within it.
     send_notification("Focusing firefox window", driver)
     time.sleep(3)
-    pyautogui.moveTo(50, 50, duration=0.5)
-    pyautogui.click(50, 50, clicks=2, interval=1)
+    # pyautogui.moveTo(50, 50, duration=0.5)
+    # pyautogui.click(50, 50, clicks=2, interval=1)
+    special_click(driver, 50, 50)
+
 
     # send_notification("Clicking 1 Player", driver)
     # time.sleep(10)
@@ -58,7 +61,7 @@ def main(driver):
     # loop over doors
     for door in list(levels)[selected_door_index:]:
         send_notification(f"\n\ndoor {door}", driver)
-        click_door(selected_door)
+        click_door(driver, selected_door)
         time.sleep(loading_delay)
         
         selected_level = detect_level(driver)

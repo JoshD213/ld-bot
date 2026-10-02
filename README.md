@@ -49,4 +49,5 @@
     ```
 
 ## CURRENT TASK:
-
+current level image scanner is not working, not able to detect the level it's on.
+pyautogui.press() is not working, but pyautogui.keyDown() is, for some reason. -- may not be worth fixing as we can just use keyDown all the time
