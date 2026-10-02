@@ -35,8 +35,18 @@
 ~~Get firefox profile storage/persistence working in tests\browser_clicking_test.py~~
 ~~Door positions moved! Game map design changed. Create a tool for faster door position measurements.~~
 ~~Fix broken door position conversions, still had some code "denormalizing" percentage based locations into pixel based, when in reality we convert pixel based to pixel based immediately and no denormalizing is needed anymore.~~
+~~full screen button sometimes doesnt click, browser window sometimes doesnt focus~~
+- NEW SELENIUM OFFSET METHOD: WORKING! https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#offset-from-viewport Moving and clicking, without using the duration on the ActionBuilder, and without using pauses between actions, did not make the hover effect appear on the doors in the game, and failed to recognize clicks on the doors.
+    ```python 
+    game = driver.find_element(By.CSS_SELECTOR, "#game-element")
+    action = ActionBuilder(driver, duration=320)
+    action.pointer_action.move_to_location(354, 564)
+    action.pointer_action.pause(0.10)
+    action.pointer_action.pointer_down(MouseButton.LEFT)
+    action.pointer_action.pause(0.08)
+    action.pointer_action.pointer_up(MouseButton.LEFT)
+    action.perform()
+    ```
 
 ## CURRENT TASK:
 
-full screen button sometimes doesnt click, browser window sometimes doesnt focus
-currently in tests/browser_clicking_test.py trying to get the window focus and door click to work consistently.

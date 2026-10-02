@@ -5,6 +5,7 @@ import time
 import pyautogui
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionBuilder
+from selenium.webdriver.common.actions.mouse_button import MouseButton
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -48,8 +49,13 @@ time.sleep(4)
 # BUG: The offset from element uses center positioning, so we wanted to try offset from viewport instead
 # in both cases, we ended up being to the upper left of the door. Something is off in the math
 game = driver.find_element(By.CSS_SELECTOR, "#game-element")
-action = ActionBuilder(driver)
+action = ActionBuilder(driver, duration=320)
 action.pointer_action.move_to_location(354, 564)
+action.pointer_action.pause(0.10)
+# action.pointer_action.click()
+action.pointer_action.pointer_down(MouseButton.LEFT)
+action.pointer_action.pause(0.08)
+action.pointer_action.pointer_up(MouseButton.LEFT)
 action.perform()
 
 # OLD PYAUTOGUI METHOD
